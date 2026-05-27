@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  check)
+    MIX_ENV=test mix check
+    ;;
+  *)
+    echo "Usage: ./dev check" >&2
+    exit 64
+    ;;
+esac

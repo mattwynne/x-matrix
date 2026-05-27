@@ -1,7 +1,7 @@
 # Seeded Read-only X-Matrix
 
 Date: 2026-05-26
-Status: ready
+Status: implemented
 
 ## Goal
 
