@@ -6,7 +6,7 @@ defmodule XMatrix.Strategies do
   import Ecto.Query
 
   alias XMatrix.Repo
-  alias XMatrix.Strategies.{Strategy, StrategyCorrelation, StrategyElement}
+  alias XMatrix.Strategies.{Strategy, StrategyCorrelation, StrategyElement, StrategyMessage}
 
   @doc "Load any strategy with elements (ordered) and correlations preloaded."
   def get_strategy!(id) do
@@ -122,6 +122,19 @@ defmodule XMatrix.Strategies do
         })
         |> Repo.insert_or_update()
     end
+  end
+
+  def add_message(%Strategy{} = strategy, role, content) when role in [:assistant, :user] do
+    %StrategyMessage{}
+    |> StrategyMessage.changeset(%{strategy_id: strategy.id, role: role, content: content})
+    |> Repo.insert()
+  end
+
+  def list_messages(%Strategy{} = strategy) do
+    StrategyMessage
+    |> where([m], m.strategy_id == ^strategy.id)
+    |> order_by([m], asc: m.inserted_at, asc: m.id)
+    |> Repo.all()
   end
 
   def elements_by_type(%Strategy{} = strategy, element_type) do

@@ -12,6 +12,13 @@ defmodule XMatrix.StrategiesTest do
     assert strategy.status == :draft
   end
 
+  test "create_draft_strategy/1 stores ai_assisted" do
+    {:ok, strategy} =
+      Strategies.create_draft_strategy(%{title: "AI draft", ai_assisted: true})
+
+    assert strategy.ai_assisted == true
+  end
+
   test "update_strategy/2 changes the title", %{strategy: strategy} do
     {:ok, updated} = Strategies.update_strategy(strategy, %{title: "Housing"})
     assert updated.title == "Housing"
@@ -56,5 +63,12 @@ defmodule XMatrix.StrategiesTest do
     assert Strategies.get_resumable_draft().id == strategy.id
     {:ok, _} = Strategies.complete_strategy(strategy)
     assert Strategies.get_resumable_draft() == nil
+  end
+
+  test "messages can be appended and listed in order", %{strategy: strategy} do
+    {:ok, first} = Strategies.add_message(strategy, :assistant, "What is your True North?")
+    {:ok, second} = Strategies.add_message(strategy, :user, "Everyone has a safe home")
+
+    assert [^first, ^second] = Strategies.list_messages(strategy)
   end
 end
