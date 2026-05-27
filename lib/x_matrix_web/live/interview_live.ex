@@ -605,7 +605,7 @@ defmodule XMatrixWeb.InterviewLive do
     <div
       :for={proposal <- @proposals}
       id={"proposal-#{proposal.id}"}
-      class="mr-10 rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm"
+      class="proposal-card mr-10 rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm"
     >
       <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700">Suggestion</p>
       <%= if @editing_id == proposal.id do %>

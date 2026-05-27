@@ -23,9 +23,11 @@ end
 config :x_matrix, XMatrixWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
-config :x_matrix,
-  anthropic_api_key: System.get_env("ANTHROPIC_API_KEY"),
-  anthropic_model: System.get_env("ANTHROPIC_MODEL", "claude-3-5-haiku-latest")
+if config_env() != :test do
+  config :x_matrix,
+    anthropic_api_key: System.get_env("ANTHROPIC_API_KEY"),
+    anthropic_model: System.get_env("ANTHROPIC_MODEL", "claude-3-5-haiku-latest")
+end
 
 if config_env() == :prod do
   database_url =

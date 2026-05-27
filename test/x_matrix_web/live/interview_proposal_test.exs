@@ -29,7 +29,7 @@ defmodule XMatrixWeb.InterviewProposalTest do
     |> fill_in("Your answer", with: "Help me")
     |> click_button("Send")
     |> assert_has("div", text: "Suggested item")
-    |> click_button("Add")
+    |> click_button(".proposal-card button", "Add")
     |> assert_has("#emerging-matrix", text: "Suggested item")
 
     [aspiration] = Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration)

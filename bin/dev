@@ -1,12 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-case "${1:-}" in
-  check)
-    MIX_ENV=test mix check
-    ;;
-  *)
-    echo "Usage: ./dev check" >&2
-    exit 64
-    ;;
-esac
+# @describe XMatrix developer commands
+
+# @cmd Install dependencies, create/migrate/seed the database, and build assets.
+setup() {
+  mix setup
+}
+
+# @cmd Start Postgres and the Phoenix server with devenv/process-compose.
+up() {
+  devenv up --strict-ports
+}
+
+# @cmd Run the Phoenix server only. Assumes Postgres is already running.
+server() {
+  mix phx.server
+}
+
+# @cmd Run the project quality gate in test mode.
+check() {
+  MIX_ENV=test mix check
+}
+
+# @cmd Run tests.
+test() {
+  mix test "$@"
+}
+
+# @cmd Open an interactive psql shell against the dev database.
+psql() {
+  PGPASSWORD=postgres psql -h localhost -U postgres -d x_matrix_dev "$@"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
