@@ -71,4 +71,24 @@ defmodule XMatrix.StrategiesTest do
 
     assert [^first, ^second] = Strategies.list_messages(strategy)
   end
+
+  test "completed strategies reject direct mutations", %{strategy: strategy} do
+    {:ok, element} = Strategies.add_element(strategy, %{element_type: :tactic, title: "Before"})
+    {:ok, target} = Strategies.add_element(strategy, %{element_type: :evidence, title: "Metric"})
+    {:ok, done} = Strategies.complete_strategy(strategy)
+
+    assert {:error, :strategy_complete} = Strategies.update_strategy(done, %{title: "Nope"})
+    assert {:error, :strategy_complete} = Strategies.set_step(done, "chat:tactic")
+
+    assert {:error, :strategy_complete} =
+             Strategies.add_element(done, %{element_type: :tactic, title: "Nope"})
+
+    assert {:error, :strategy_complete} = Strategies.update_element(element, %{title: "Nope"})
+    assert {:error, :strategy_complete} = Strategies.delete_element(element)
+
+    assert {:error, :strategy_complete} =
+             Strategies.upsert_correlation(done, element, target, :strong)
+
+    assert {:error, :strategy_complete} = Strategies.add_message(done, :user, "Nope")
+  end
 end

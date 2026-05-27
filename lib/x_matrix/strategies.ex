@@ -53,11 +53,15 @@ defmodule XMatrix.Strategies do
   end
 
   def update_strategy(%Strategy{} = strategy, attrs) do
-    strategy |> Strategy.changeset(attrs) |> Repo.update()
+    with :ok <- ensure_draft(strategy) do
+      strategy |> Strategy.changeset(attrs) |> Repo.update()
+    end
   end
 
   def set_step(%Strategy{} = strategy, step) when is_binary(step) do
-    strategy |> Strategy.changeset(%{current_step: step}) |> Repo.update()
+    with :ok <- ensure_draft(strategy) do
+      strategy |> Strategy.changeset(%{current_step: step}) |> Repo.update()
+    end
   end
 
   def complete_strategy(%Strategy{} = strategy) do
@@ -73,61 +77,73 @@ defmodule XMatrix.Strategies do
   end
 
   def add_element(%Strategy{} = strategy, attrs) do
-    next_position =
-      StrategyElement
-      |> where([e], e.strategy_id == ^strategy.id)
-      |> select([e], count(e.id))
-      |> Repo.one()
-      |> Kernel.+(1)
+    with :ok <- ensure_draft(strategy) do
+      next_position =
+        StrategyElement
+        |> where([e], e.strategy_id == ^strategy.id)
+        |> select([e], count(e.id))
+        |> Repo.one()
+        |> Kernel.+(1)
 
-    %StrategyElement{}
-    |> StrategyElement.changeset(
-      attrs
-      |> Map.put(:strategy_id, strategy.id)
-      |> Map.put(:position, next_position)
-    )
-    |> Repo.insert()
+      %StrategyElement{}
+      |> StrategyElement.changeset(
+        attrs
+        |> Map.put(:strategy_id, strategy.id)
+        |> Map.put(:position, next_position)
+      )
+      |> Repo.insert()
+    end
   end
 
   def update_element(%StrategyElement{} = element, attrs) do
-    element |> StrategyElement.changeset(attrs) |> Repo.update()
+    with :ok <- ensure_draft(element) do
+      element |> StrategyElement.changeset(attrs) |> Repo.update()
+    end
   end
 
-  def delete_element(%StrategyElement{} = element), do: Repo.delete(element)
+  def delete_element(%StrategyElement{} = element) do
+    with :ok <- ensure_draft(element) do
+      Repo.delete(element)
+    end
+  end
 
   @doc "Set (or clear, when strength is :none) the correlation for a source→target pair."
   def upsert_correlation(%Strategy{} = strategy, source, target, strength) do
-    existing =
-      StrategyCorrelation
-      |> Repo.get_by(
-        strategy_id: strategy.id,
-        source_element_id: source.id,
-        target_element_id: target.id
-      )
-
-    cond do
-      strength == :none and is_nil(existing) ->
-        {:ok, nil}
-
-      strength == :none ->
-        Repo.delete(existing)
-
-      true ->
-        (existing || %StrategyCorrelation{})
-        |> StrategyCorrelation.changeset(%{
+    with :ok <- ensure_draft(strategy) do
+      existing =
+        StrategyCorrelation
+        |> Repo.get_by(
           strategy_id: strategy.id,
           source_element_id: source.id,
-          target_element_id: target.id,
-          strength: strength
-        })
-        |> Repo.insert_or_update()
+          target_element_id: target.id
+        )
+
+      cond do
+        strength == :none and is_nil(existing) ->
+          {:ok, nil}
+
+        strength == :none ->
+          Repo.delete(existing)
+
+        true ->
+          (existing || %StrategyCorrelation{})
+          |> StrategyCorrelation.changeset(%{
+            strategy_id: strategy.id,
+            source_element_id: source.id,
+            target_element_id: target.id,
+            strength: strength
+          })
+          |> Repo.insert_or_update()
+      end
     end
   end
 
   def add_message(%Strategy{} = strategy, role, content) when role in [:assistant, :user] do
-    %StrategyMessage{}
-    |> StrategyMessage.changeset(%{strategy_id: strategy.id, role: role, content: content})
-    |> Repo.insert()
+    with :ok <- ensure_draft(strategy) do
+      %StrategyMessage{}
+      |> StrategyMessage.changeset(%{strategy_id: strategy.id, role: role, content: content})
+      |> Repo.insert()
+    end
   end
 
   def list_messages(%Strategy{} = strategy) do
@@ -139,5 +155,14 @@ defmodule XMatrix.Strategies do
 
   def elements_by_type(%Strategy{} = strategy, element_type) do
     Enum.filter(strategy.elements, &(&1.element_type == element_type))
+  end
+
+  defp ensure_draft(%Strategy{status: :draft}), do: :ok
+  defp ensure_draft(%Strategy{}), do: {:error, :strategy_complete}
+
+  defp ensure_draft(%StrategyElement{} = element) do
+    element.strategy_id
+    |> get_strategy!()
+    |> ensure_draft()
   end
 end
