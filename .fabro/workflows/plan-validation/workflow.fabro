@@ -1,0 +1,122 @@
+digraph PlanValidation {
+    graph [
+        goal="Rigorously validate the iteration plan at {{ inputs.plan_path }} and decide whether it is ready for implementation",
+        default_fidelity="summary:high",
+        model_stylesheet="
+            * { reasoning_effort: high; }
+            #read_plan { reasoning_effort: low; }
+            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }
+            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }
+            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }
+            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }
+            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }
+            #read_updated_plan { reasoning_effort: low; }
+            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }
+            #publish_ready { reasoning_effort: low; }
+        "
+    ]
+    rankdir=LR
+
+    start [shape=Mdiamond, label="Start"]
+    exit  [shape=Msquare, label="Exit"]
+
+    read_plan [
+        label="Read Iteration Plan",
+        shape=parallelogram,
+        script="PLAN_PATH='{{ inputs.plan_path }}'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\""
+    ]
+
+    read_failed [
+        label="Fail: Plan Missing",
+        shape=parallelogram,
+        goal_gate=true,
+        script="echo 'Plan validation failed: the plan file could not be read. Fix plan_path or make the plan visible to the sandbox, then retry.' >&2\nexit 1"
+    ]
+
+    fork [label="Independent Model Reviews", shape=component, join_policy="wait_all", max_parallel=3]
+
+    gemini_review [
+        label="Gemini Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    claude_review [
+        label="Claude Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    codex_review [
+        label="Codex/GPT Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    merge [label="Merge Reviews", shape=tripleoctagon]
+
+    synthesize [
+        label="Opus Synthesis & Repair Brief",
+        shape=tab,
+        output_schema="routing",
+        prompt="@prompts/synthesize.md"
+    ]
+
+    synthesis_gate [shape=diamond, label="Obvious fixes?"]
+
+    codex_update [
+        label="Codex Updates Plan",
+        prompt="@prompts/apply_fixes.md"
+    ]
+
+    read_updated_plan [
+        label="Read Updated Plan",
+        shape=parallelogram,
+        script="PLAN_PATH='{{ inputs.plan_path }}'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found after Codex update: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'UPDATED PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,320p' \"$PLAN_PATH\""
+    ]
+
+    opus_recheck [
+        label="Opus Recheck",
+        shape=tab,
+        prompt="@prompts/recheck.md"
+    ]
+
+    recheck_gate [shape=diamond, label="Plan ready?"]
+
+    publish_ready [
+        label="Publish Ready Plan",
+        shape=parallelogram,
+        script=".fabro/workflows/plan-validation/scripts/publish_ready.sh '{{ inputs.plan_path }}'"
+    ]
+
+    not_ready [
+        label="Fail: Plan Not Ready",
+        shape=parallelogram,
+        goal_gate=true,
+        script="echo 'Plan validation failed: the plan is not ready for implementation. See the Opus report for remaining gaps or decisions that need human input.' >&2\nexit 1"
+    ]
+
+    start -> read_plan
+    read_plan -> fork [condition="outcome=succeeded"]
+    read_plan -> read_failed
+    read_failed -> exit
+    fork -> gemini_review
+    fork -> claude_review
+    fork -> codex_review
+    gemini_review -> merge
+    claude_review -> merge
+    codex_review -> merge
+    merge -> synthesize
+    synthesize -> synthesis_gate
+    synthesis_gate -> publish_ready [label="Already ready", condition="plan_ready=true"]
+    synthesis_gate -> codex_update [label="Apply obvious fixes", condition="plan_needs_fix=true"]
+    synthesis_gate -> not_ready [label="Needs human input"]
+    codex_update -> read_updated_plan
+    read_updated_plan -> opus_recheck
+    opus_recheck -> recheck_gate
+    recheck_gate -> publish_ready [label="Ready", condition="plan_ready=true"]
+    recheck_gate -> codex_update [label="Fix again", condition="plan_needs_fix=true && context.internal.node_visit_count < 3"]
+    recheck_gate -> not_ready [label="Not ready"]
+    publish_ready -> exit
+    not_ready -> exit
+}

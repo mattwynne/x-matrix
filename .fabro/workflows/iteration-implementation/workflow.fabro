@@ -1,0 +1,132 @@
+digraph IterationImplementation {
+    graph [
+        goal="Implement the iteration plan at {{ inputs.plan_path }} and leave the codebase passing dev check",
+        default_fidelity="summary:high",
+        max_node_visits=24,
+        model_stylesheet="
+            * { reasoning_effort: high; }
+            #read_plan { reasoning_effort: low; }
+            #implement { model: gpt-5.3-codex; reasoning_effort: high; }
+            #fix_dev_check { model: gpt-5.3-codex; reasoning_effort: high; }
+            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }
+            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }
+            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }
+            #synthesize_review { model: claude-opus-4-6; reasoning_effort: high; }
+            #apply_review_fixes { model: gpt-5.3-codex; reasoning_effort: high; }
+            #final_summary { reasoning_effort: low; }
+        "
+    ]
+    rankdir=LR
+
+    start [shape=Mdiamond, label="Start"]
+    exit  [shape=Msquare, label="Exit"]
+
+    read_plan [
+        label="Read Iteration Plan",
+        shape=parallelogram,
+        script="PLAN_PATH='{{ inputs.plan_path }}'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Iteration plan not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,320p' \"$PLAN_PATH\""
+    ]
+
+    read_failed [
+        label="Fail: Plan Missing",
+        shape=parallelogram,
+        goal_gate=true,
+        script="echo 'Iteration implementation failed: the plan file could not be read. Pass -I plan_path=docs/iterations/NNN-topic/plan.md and ensure it is committed/pushed for remote sandboxes.' >&2\nexit 1"
+    ]
+
+    implement [
+        label="Implement Iteration",
+        prompt="@prompts/implement.md",
+        timeout="3600s"
+    ]
+
+    dev_check [
+        label="Run Dev Check",
+        shape=parallelogram,
+        script="PATH=\"$PWD/bin:$PATH\" dev check",
+        timeout="1800s"
+    ]
+
+    fix_dev_check [
+        label="Fix Dev Check Failures",
+        prompt="@prompts/fix_dev_check.md",
+        timeout="2400s",
+        max_visits=3
+    ]
+
+    review_fork [label="Independent Implementation Reviews", shape=component, join_policy="wait_all", max_parallel=3]
+
+    claude_review [
+        label="Claude Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    codex_review [
+        label="Codex/GPT Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    gemini_review [
+        label="Gemini Review",
+        shape=tab,
+        prompt="@prompts/review.md"
+    ]
+
+    review_merge [label="Merge Reviews", shape=tripleoctagon]
+
+    synthesize_review [
+        label="Synthesize Review",
+        shape=tab,
+        output_schema="routing",
+        prompt="@prompts/synthesize_review.md"
+    ]
+
+    review_gate [shape=diamond, label="Implementation accepted?"]
+
+    apply_review_fixes [
+        label="Apply Review Fixes",
+        prompt="@prompts/apply_review_fixes.md",
+        timeout="2400s",
+        max_visits=3
+    ]
+
+    not_ready [
+        label="Fail: Needs Human Review",
+        shape=parallelogram,
+        goal_gate=true,
+        script="echo 'Iteration implementation failed: reviewers found blocking issues that require human input or exceeded the automatic repair budget.' >&2\nexit 1"
+    ]
+
+    final_summary [
+        label="Final Summary",
+        shape=tab,
+        prompt="@prompts/final_summary.md"
+    ]
+
+    start -> read_plan
+    read_plan -> implement [condition="outcome=succeeded"]
+    read_plan -> read_failed
+    read_failed -> exit
+
+    implement -> dev_check
+    dev_check -> review_fork [label="Dev check passed", condition="outcome=succeeded"]
+    dev_check -> fix_dev_check [label="Fix failures"]
+    fix_dev_check -> dev_check
+
+    review_fork -> claude_review
+    review_fork -> codex_review
+    review_fork -> gemini_review
+    claude_review -> review_merge
+    codex_review -> review_merge
+    gemini_review -> review_merge
+    review_merge -> synthesize_review
+    synthesize_review -> review_gate
+    review_gate -> final_summary [label="Accepted", condition="context.implementation_accepted=true"]
+    review_gate -> apply_review_fixes [label="Fix", condition="context.review_fixes_available=true"]
+    review_gate -> not_ready [label="Needs human input"]
+    apply_review_fixes -> dev_check
+    final_summary -> exit
+    not_ready -> exit
+}

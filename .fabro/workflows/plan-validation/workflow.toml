@@ -1,0 +1,10 @@
+_version = 1
+
+[workflow]
+graph = "workflow.fabro"
+
+[run]
+goal = "Validate that an iteration plan is ready for implementation"
+
+[run.inputs]
+plan_path = "docs/iterations/NNN-topic/plan.md"

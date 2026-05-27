@@ -1,0 +1,29 @@
+_version = 1
+
+[workflow]
+graph = "workflow.fabro"
+
+[run]
+goal = "Implement a validated iteration plan and leave the codebase passing dev check"
+
+[run.environment]
+id = "x-matrix-dev"
+
+[environments.x-matrix-dev]
+provider = "docker"
+
+[environments.x-matrix-dev.image]
+ref = "x-matrix-fabro-dev:latest"
+
+[environments.x-matrix-dev.resources]
+cpu = 4
+memory = "8GB"
+
+[run.inputs]
+plan_path = "docs/iterations/NNN-topic/plan.md"
+
+[run.pull_request]
+enabled = true
+draft = false
+auto_merge = true
+merge_strategy = "squash"
