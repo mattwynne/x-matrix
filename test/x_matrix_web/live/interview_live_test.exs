@@ -3,69 +3,108 @@ defmodule XMatrixWeb.InterviewLiveTest do
 
   alias XMatrix.Strategies
 
-  test "starting an interview creates a draft and opens the welcome screen", %{conn: conn} do
+  test "starting an interview creates a draft and opens the chat shell", %{conn: conn} do
     conn
     |> visit("/interview")
-    |> assert_has("h1", text: "Let's build your strategy")
+    |> assert_has("h1", text: "Conversational interview")
+    |> assert_has("#interview-transcript")
+    |> assert_has("#chat-form")
+    |> assert_has("#emerging-matrix")
+    |> assert_has("#taste-progress")
+    |> assert_has("#ai-toggle")
 
     assert Strategies.get_resumable_draft() != nil
   end
 
-  test "the welcome screen has no Back button", %{conn: conn} do
-    conn
-    |> visit("/interview")
-    |> refute_has("button", text: "Back")
-  end
-
-  test "saving the name moves on to True North", %{conn: conn} do
-    conn
-    |> visit("/interview")
-    |> click_button("Let's begin")
-    |> fill_in("Strategy name", with: "Reduce homelessness")
-    |> click_button("Next")
-    |> assert_has("h1", text: "What is your True North?")
-  end
-
-  test "an element section captures a statement then a why", %{conn: conn} do
+  test "scripted mode adds typed answers directly to the emerging matrix", %{conn: conn} do
     {:ok, strategy} =
-      Strategies.create_draft_strategy(%{title: "S", current_step: "elem:add:aspiration"})
+      Strategies.create_draft_strategy(%{
+        title: "S",
+        current_step: "chat:aspiration",
+        ai_assisted: false
+      })
 
     conn
     |> visit("/interview/#{strategy.id}")
-    |> click_button("+ Add aspiration")
-    |> fill_in("New aspiration", with: "Reduce rough sleeping")
-    |> click_button("Next")
-    |> assert_has("h1", text: "Why does this aspiration matter?")
-    |> fill_in("Why this matters", with: "It is the sharpest end of the crisis")
-    |> click_button("Save")
-    |> assert_has("li", text: "Reduce rough sleeping")
-    |> assert_has("li", text: "It is the sharpest end of the crisis")
+    |> fill_in("Your answer", with: "Reduce rough sleeping")
+    |> click_button("Send")
+    |> assert_has("#emerging-matrix", text: "Reduce rough sleeping")
 
     [aspiration] = Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration)
     assert aspiration.title == "Reduce rough sleeping"
-    assert aspiration.description == "It is the sharpest end of the crisis"
+
+    assert Enum.map(Strategies.list_messages(strategy), & &1.role) == [
+             :assistant,
+             :user,
+             :assistant
+           ]
   end
 
-  test "an item can be removed from the hub", %{conn: conn} do
-    {:ok, strategy} =
-      Strategies.create_draft_strategy(%{title: "S", current_step: "elem:add:tactic"})
+  test "AI mode treats free text as chat until Add my answer", %{conn: conn} do
+    previous_key = Application.get_env(:x_matrix, :anthropic_api_key)
+    Application.put_env(:x_matrix, :anthropic_api_key, "test-key")
 
-    {:ok, _} = Strategies.add_element(strategy, %{element_type: :tactic, title: "Doomed tactic"})
+    on_exit(fn -> Application.put_env(:x_matrix, :anthropic_api_key, previous_key) end)
+
+    {:ok, strategy} =
+      Strategies.create_draft_strategy(%{
+        title: "S",
+        current_step: "chat:aspiration",
+        ai_assisted: true
+      })
+
+    session =
+      conn
+      |> visit("/interview/#{strategy.id}")
+      |> fill_in("Your answer", with: "Reduce rough sleeping")
+      |> click_button("Send")
+      |> assert_has("#interview-transcript", text: "Reduce rough sleeping")
+
+    assert Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration) == []
+
+    session
+    |> click_button("Add my answer")
+    |> assert_has("#emerging-matrix", text: "Reduce rough sleeping")
+
+    [aspiration] = Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration)
+    assert aspiration.title == "Reduce rough sleeping"
+  end
+
+  test "AI toggle persists on the draft", %{conn: conn} do
+    {:ok, strategy} =
+      Strategies.create_draft_strategy(%{
+        title: "S",
+        current_step: "chat:true_north",
+        ai_assisted: false
+      })
 
     conn
     |> visit("/interview/#{strategy.id}")
-    |> assert_has("li", text: "Doomed tactic")
-    |> click_button("Remove")
-    |> refute_has("li", text: "Doomed tactic")
+    |> click_button("AI OFF")
+    |> assert_has("#ai-toggle", text: "AI ON")
+
+    assert Strategies.get_strategy!(strategy.id).ai_assisted == true
   end
 
-  test "the strategy section advises even-over phrasing", %{conn: conn} do
+  test "AI on without a key shows fallback notice and behaves like manual entry", %{conn: conn} do
+    previous_key = Application.get_env(:x_matrix, :anthropic_api_key)
+    Application.put_env(:x_matrix, :anthropic_api_key, nil)
+
+    on_exit(fn -> Application.put_env(:x_matrix, :anthropic_api_key, previous_key) end)
+
     {:ok, strategy} =
-      Strategies.create_draft_strategy(%{title: "S", current_step: "elem:intro:strategy"})
+      Strategies.create_draft_strategy(%{
+        title: "S",
+        current_step: "chat:true_north",
+        ai_assisted: true
+      })
 
     conn
     |> visit("/interview/#{strategy.id}")
-    |> assert_has("p", text: "even over")
+    |> assert_has("div", text: "No Anthropic API key is configured")
+    |> fill_in("Your answer", with: "Everyone has a home")
+    |> click_button("Send")
+    |> assert_has("#emerging-matrix", text: "Everyone has a home")
   end
 
   test "a correlation source rates each target and saves", %{conn: conn} do
