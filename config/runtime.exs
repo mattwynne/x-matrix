@@ -26,7 +26,7 @@ config :x_matrix, XMatrixWeb.Endpoint,
 if config_env() != :test do
   config :x_matrix,
     anthropic_api_key: System.get_env("ANTHROPIC_API_KEY"),
-    anthropic_model: System.get_env("ANTHROPIC_MODEL", "claude-3-5-haiku-latest")
+    anthropic_model: System.get_env("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
 end
 
 if config_env() == :prod do
