@@ -1,7 +1,7 @@
 # Seeded Read-only X-Matrix
 
 Date: 2026-05-26
-Status: draft
+Status: ready
 
 ## Goal
 
@@ -61,14 +61,17 @@ This iteration should define Evidence before Tactics in the seeded example, refl
 
 ## Acceptance Criteria
 
-- A developer can set up the app, create the database, and run seeds using standard Phoenix project commands documented by the generated project and/or README.
-- Visiting `/` renders a seeded multi-agency homelessness reduction strategy.
-- The page includes the five TASTE areas: True North, Aspirations, Strategies, Evidence, and Tactics.
-- The page displays correlation strengths for Strategies → Aspirations, Evidence → Aspirations, Tactics → Strategies, and Tactics → Evidence.
-- The visualization is recognizable as an X-Matrix, even if visually rough.
-- The UI is read-only: there are no controls for adding, editing, or deleting strategy data.
-- Automated tests using `phoenix_test` verify that `/` renders the seeded X-Matrix and key seeded content.
-- `dev check` passes.
+- The Phoenix application starts successfully and connects to Postgres.
+- The database can be created, migrated, and seeded without errors.
+- Visiting `/` returns an HTTP 200 response.
+- The page at `/` displays the seeded homelessness reduction strategy by name/title.
+- The page renders at least one element of each of the five types: True North, Aspiration, Strategy, Evidence, and Tactic.
+- The page renders at least one correlation between two elements, displaying its strength (e.g., weak, medium, strong).
+- At least two distinct correlation strengths are visually distinguishable on the page.
+- The layout uses a grid or equivalent structure with distinct regions/quadrants for the element types, recognizable as an X-Matrix format (four quadrants around a center correlation area).
+- The page is read-only: no forms, edit buttons, or mutation endpoints exist.
+- `dev check` passes (formatting, compilation with zero warnings, and tests).
+- At least one `phoenix_test` test verifies the seeded content is rendered at `/`.
 
 ## Open Business Decisions
 
@@ -107,9 +110,9 @@ After this iteration, we can run a real Phoenix app and view a persisted, seeded
 - Run automated tests, including `phoenix_test` coverage for `/`.
 - Manually visit `/` and confirm:
   - the homelessness strategy appears;
-  - all TASTE sections appear;
-  - correlation strengths appear;
-  - the result is recognizable as an X-Matrix;
+  - at least one element of each of the five types (True North, Aspiration, Strategy, Evidence, Tactic) is visible;
+  - at least one correlation is displayed with a visible strength indicator, and at least two distinct strengths are distinguishable;
+  - the layout has distinct regions for each element type arranged in an X-Matrix format (four quadrants with a center correlation area);
   - the page is read-only.
 
 ## Risks / Follow-ups
