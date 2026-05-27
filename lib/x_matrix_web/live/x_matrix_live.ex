@@ -4,8 +4,8 @@ defmodule XMatrixWeb.XMatrixLive do
   alias XMatrix.Strategies
 
   @impl true
-  def mount(_params, _session, socket) do
-    strategy = Strategies.get_seeded_strategy!()
+  def mount(%{"id" => id}, _session, socket) do
+    strategy = Strategies.get_strategy!(id)
 
     {:ok,
      socket

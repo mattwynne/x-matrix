@@ -7,6 +7,8 @@ defmodule XMatrix.Strategies.Strategy do
   schema "strategies" do
     field :title, :string
     field :description, :string
+    field :status, Ecto.Enum, values: [:draft, :complete], default: :draft
+    field :current_step, :string
 
     has_many :elements, StrategyElement
     has_many :correlations, StrategyCorrelation
@@ -16,7 +18,7 @@ defmodule XMatrix.Strategies.Strategy do
 
   def changeset(strategy, attrs) do
     strategy
-    |> cast(attrs, [:title, :description])
+    |> cast(attrs, [:title, :description, :status, :current_step])
     |> validate_required([:title])
   end
 end

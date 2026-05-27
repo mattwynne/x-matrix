@@ -17,7 +17,10 @@ defmodule XMatrixWeb.Router do
   scope "/", XMatrixWeb do
     pipe_through :browser
 
-    live "/", XMatrixLive, :home
+    live "/", HomeLive, :home
+    live "/interview", InterviewLive, :new
+    live "/interview/:id", InterviewLive, :edit
+    live "/strategies/:id", XMatrixLive, :show
   end
 
   # Other scopes may use custom stacks.

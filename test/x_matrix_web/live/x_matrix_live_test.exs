@@ -58,12 +58,12 @@ defmodule XMatrixWeb.XMatrixLiveTest do
     })
     |> Repo.insert!()
 
-    :ok
+    %{strategy: strategy}
   end
 
-  test "renders the seeded read-only X-Matrix", %{conn: conn} do
+  test "renders the read-only X-Matrix", %{conn: conn, strategy: strategy} do
     conn
-    |> visit("/")
+    |> visit("/strategies/#{strategy.id}")
     |> assert_has("h1", text: "Multi-agency homelessness reduction strategy")
     |> assert_has("h2", text: "True North")
     |> assert_has("span", text: "Strategies")
