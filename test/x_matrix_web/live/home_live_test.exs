@@ -3,15 +3,17 @@ defmodule XMatrixWeb.HomeLiveTest do
 
   alias XMatrix.Strategies
 
-  test "shows the three choices and links to the example matrix", %{conn: conn} do
-    {:ok, example} = Strategies.create_draft_strategy(%{title: "Example"})
-    {:ok, _} = Strategies.complete_strategy(example)
+  test "lists completed strategies with links to their matrices", %{conn: conn} do
+    {:ok, finished} = Strategies.create_draft_strategy(%{title: "Reduce homelessness"})
+    {:ok, finished} = Strategies.complete_strategy(finished)
 
     conn
     |> visit("/")
-    |> assert_has("a", text: "View example matrix")
-    |> assert_has("a", text: "Start interview")
-    |> refute_has("a", text: "Resume interview")
+    |> assert_has("a", text: "Reduce homelessness")
+    |> assert_has("a", text: "Start a new strategy")
+    |> refute_has("a", text: "View example matrix")
+    |> click_link("Reduce homelessness")
+    |> assert_path("/strategies/#{finished.id}")
   end
 
   test "shows resume when a draft exists", %{conn: conn} do
@@ -20,5 +22,13 @@ defmodule XMatrixWeb.HomeLiveTest do
     conn
     |> visit("/")
     |> assert_has("a", text: "Resume interview")
+  end
+
+  test "drafts are not listed as completed strategies", %{conn: conn} do
+    {:ok, _draft} = Strategies.create_draft_strategy(%{title: "Half-finished draft"})
+
+    conn
+    |> visit("/")
+    |> refute_has("a", text: "Half-finished draft")
   end
 end

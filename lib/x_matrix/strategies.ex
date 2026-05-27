@@ -23,6 +23,14 @@ defmodule XMatrix.Strategies do
     |> then(&get_strategy!(&1.id))
   end
 
+  @doc "List completed strategies, most recently worked on first."
+  def list_strategies do
+    Strategy
+    |> where([s], s.status == :complete)
+    |> order_by([s], desc: s.updated_at, desc: s.id)
+    |> Repo.all()
+  end
+
   defp preload_ordered(strategy) do
     Repo.preload(
       strategy,
