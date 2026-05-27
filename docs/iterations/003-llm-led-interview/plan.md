@@ -1,7 +1,7 @@
 # LLM-led Conversational Interview
 
 Date: 2026-05-27
-Status: proposed (design)
+Status: implemented
 
 ## Goal
 
