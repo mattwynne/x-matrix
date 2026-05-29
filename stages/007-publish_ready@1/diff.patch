@@ -1,0 +1,25 @@
+diff --git a/docs/iterations/005-true-north-agreement-flow/plan.md b/docs/iterations/005-true-north-agreement-flow/plan.md
+index 34eefef..390becd 100644
+--- a/docs/iterations/005-true-north-agreement-flow/plan.md
++++ b/docs/iterations/005-true-north-agreement-flow/plan.md
+@@ -1,7 +1,7 @@
+ # True North Agreement Flow
+ 
+ Date: 2026-05-29
+-Status: draft
++Status: ready
+ 
+ ## Goal
+ 
+diff --git a/docs/iterations/README.md b/docs/iterations/README.md
+index 15f868f..b8d0221 100644
+--- a/docs/iterations/README.md
++++ b/docs/iterations/README.md
+@@ -6,6 +6,6 @@
+ | 002 | Structured interview without LLM | [plan](002-structured-interview/plan.md) | 2026-05-27 | implemented | None yet |
+ | 003 | LLM-led conversational interview | [plan](003-llm-led-interview/plan.md) | 2026-05-27 | implemented | None yet |
+ | 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | implemented | None yet |
+-| 005 | True North agreement flow | [plan](005-true-north-agreement-flow/plan.md) | 2026-05-29 | draft | None yet |
++| 005 | True North agreement flow | [plan](005-true-north-agreement-flow/plan.md) | 2026-05-29 | ready | None yet |
+ | 006 | Coherence and correlation assistance | TBD | TBD | proposed | None yet |
+ | 007 | Tracking and review loop | TBD | TBD | proposed | None yet |

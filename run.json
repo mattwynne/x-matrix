@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T07:08:27.573038488Z",
-  "last_event_at": "2026-05-29T07:10:38.702539918Z",
+  "last_event_at": "2026-05-29T07:10:41.607708648Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -1305,9 +1305,9 @@
       }
     },
     {
-      "seq": 0,
+      "seq": 98,
       "checkpoint": {
-        "timestamp": "2026-05-29T07:10:38.705282885Z",
+        "timestamp": "2026-05-29T07:10:41.607618556Z",
         "current_node": "publish_ready",
         "completed_nodes": [
           "start",
@@ -1320,19 +1320,35 @@
         ],
         "node_retries": {},
         "context_values": {
-          "graph.default_fidelity": "summary:high",
-          "last_stage": "synthesize",
-          "thread.synthesize.current_node": "synthesis_gate",
-          "internal.node_visit_count": 1,
-          "thread.read_plan.current_node": "fork",
+          "thread.merge.current_node": "synthesize",
           "failure_signature": "",
-          "internal.work_dir": "/workspace/x-matrix",
-          "internal.retry_count.publish_ready": 0,
+          "failure_class": "",
+          "parallel.fan_in.best_head_sha": "59fb59ddac3037eb8e9701435cb09299105b25c7",
+          "thread.start.current_node": "read_plan",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
+          "internal.run_id": "01KSS9057WAZTY03MHHQR8D0PY",
+          "internal.node_visit_count": 1,
+          "internal.retry_count.merge": 0,
+          "parallel.branch_count": 3,
+          "plan_needs_human": false,
+          "plan_needs_fix": false,
+          "outcome": "succeeded",
+          "thread.synthesize.current_node": "synthesis_gate",
           "current_node": "publish_ready",
-          "command.output": "blob://sha256/b6b972c2683b2f960ef3c750e5c26a490ffb0bc11e33b86af90dd6223a0eb116",
-          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issue",
+          "internal.retry_count.synthesis_gate": 0,
+          "graph.default_fidelity": "summary:high",
+          "internal.thread_id": "synthesis_gate",
+          "thread.fork.current_node": "merge",
           "graph.rankdir": "LR",
-          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "internal.retry_count.start": 0,
+          "parallel.fan_in.best_id": "claude_review",
+          "thread.read_plan.current_node": "fork",
+          "internal.retry_count.synthesize": 0,
+          "internal.retry_count.fork": 0,
+          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issue",
+          "last_stage": "synthesize",
+          "internal.retry_count.publish_ready": 0,
+          "internal.work_dir": "/workspace/x-matrix",
           "parallel.results": [
             {
               "id": "gemini_review",
@@ -1350,45 +1366,24 @@
               "head_sha": "b38b7332f3cf6825fd28e5a35f90e6fac260d43b"
             }
           ],
-          "plan_needs_human": false,
-          "plan_needs_fix": false,
-          "internal.retry_count.merge": 0,
-          "thread.merge.current_node": "synthesize",
           "plan_ready": true,
-          "failure_class": "",
-          "thread.fork.current_node": "merge",
-          "parallel.fan_in.best_head_sha": "59fb59ddac3037eb8e9701435cb09299105b25c7",
-          "internal.fidelity": "summary:high",
-          "internal.retry_count.start": 0,
-          "parallel.branch_count": 3,
-          "thread.synthesis_gate.current_node": "publish_ready",
-          "internal.retry_count.synthesis_gate": 0,
           "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issues raised are either non-blocking, already addressed in the plan, or are implementation details that don't require plan-level decisions.\n\n## 2. Consensus Findings\n\n- **Well-scoped**: All three reviewers agree the plan has a clear, bounded scope (True North agreement flow only) with explicit deferral of generalization to other TASTE sections.\n- **Concrete acceptance criteria**: The plan provides testable acceptance criteria, a validation plan with both automated and manual steps, and a demo script.\n- **Technical design is specified**: The `strategy_section_sessions` table with JSONB `state`, the `TrueNorthAgent` module, the tool-call interface, and the LiveView component structure are all defined with enough detail to implement.\n- **AI integration approach is sound**: Fake adapters for testing, structured tool calls for candidate generation, and graceful fallback for missing API keys are all addressed.\n- **State management is clear**: Session persistence, resume/restore behavior, and the separation of working state (JSONB) from submitted domain data (normalized `true_norths` table) are explicitly designed.\n- **Risk awareness is adequate**: The plan identifies key risks (JSONB as source of truth, model variance, candidate ID stability after resume) and provides mitigation approaches.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about missing error-handling specifics for AI provider failures**: Downgraded from blocking. The plan specifies a fallback path for no-key/provider-error scenarios, and the acceptance criteria include testing this path. Detailed error-handling UX (retry buttons, specific error messages) is an implementation detail, not a plan-level gap.\n\n- **Claude's note about acceptance criteria needing tightening**: Downgraded. The acceptance criteria in the plan are already concrete and testable (e.g., \"candidate cards render,\" \"accept/submit creates the single True North and advances to Aspirations,\" \"returning/resuming restores persisted session state\"). These are sufficient for an engineer to write tests against.\n\n- **Codex/GPT's suggestion to add explicit performance/latency criteria**: Rejected as not blocking. This is iteration 5 of an early-stage product. Performance benchmarks would be premature scope creep. The plan correctly focuses on functional correctness.\n\n- **Multiple reviewers noting the JSONB schema could be more precisely specified**: Downgraded. The plan states the `state` column holds agent working state (conversation history, candidates, selected candidate) and explicitly warns against making JSONB the source of truth for submitted data. The exact JSONB shape is an implementation detail that the engineer will define when building the agent module.\n\n- **Gemini's concern about missing migration rollback strategy**: Rejected. Standard Ecto migration practices apply; this doesn't need plan-level specification.\n\n## 4. Blocking Gaps\n\nNone identified. The plan provides sufficient detail for implementation across all dimensions: scope, data model, component architecture, AI integration, state management, testing strategy, and validation criteria.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nN/A — no repairs needed. The plan is ready for implementation as-is.\n\n---\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "command.output": "blob://sha256/b6b972c2683b2f960ef3c750e5c26a490ffb0bc11e33b86af90dd6223a0eb116",
           "parallel.fan_in.best_outcome": "succeeded",
-          "thread.start.current_node": "read_plan",
-          "internal.retry_count.read_plan": 0,
-          "internal.retry_count.synthesize": 0,
-          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
-          "internal.thread_id": "synthesis_gate",
-          "internal.retry_count.fork": 0,
-          "parallel.fan_in.best_id": "claude_review",
-          "internal.run_id": "01KSS9057WAZTY03MHHQR8D0PY",
-          "outcome": "succeeded"
+          "internal.fidelity": "summary:high",
+          "thread.synthesis_gate.current_node": "publish_ready",
+          "internal.retry_count.read_plan": 0
         },
         "node_outcomes": {
-          "read_plan": {
+          "start": {
             "status": "succeeded",
-            "context_updates": {
-              "command.output": "blob://sha256/e6dd9d2c73344f0ac291ae7bbc824e01664855f32420c9a836cec1a0cf40ef7e"
-            },
-            "notes": "Script completed: PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
-            "usage": null,
-            "timing": {
-              "wall_time_ms": 0,
-              "inference_time_ms": 0,
-              "tool_time_ms": 154,
-              "active_time_ms": 154
-            }
+            "usage": null
+          },
+          "synthesis_gate": {
+            "status": "succeeded",
+            "notes": "Conditional node evaluated: synthesis_gate",
+            "usage": null
           },
           "synthesize": {
             "status": "succeeded",
@@ -1431,11 +1426,6 @@
               "active_time_ms": 21867
             }
           },
-          "synthesis_gate": {
-            "status": "succeeded",
-            "notes": "Conditional node evaluated: synthesis_gate",
-            "usage": null
-          },
           "publish_ready": {
             "status": "succeeded",
             "context_updates": {
@@ -1450,8 +1440,24 @@
               "active_time_ms": 1873
             }
           },
-          "start": {
+          "read_plan": {
             "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/e6dd9d2c73344f0ac291ae7bbc824e01664855f32420c9a836cec1a0cf40ef7e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 154,
+              "active_time_ms": 154
+            }
+          },
+          "fork": {
+            "status": "succeeded",
+            "jump_to_node": "merge",
+            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
             "usage": null
           },
           "merge": {
@@ -1469,29 +1475,133 @@
               "tool_time_ms": 0,
               "active_time_ms": 0
             }
-          },
-          "fork": {
-            "status": "succeeded",
-            "jump_to_node": "merge",
-            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
-            "usage": null
           }
         },
         "next_node_id": "exit",
+        "git_commit_sha": "2ef08cd633d7c19e5d4281b407c877cb8faaff61",
         "node_visits": {
-          "publish_ready": 1,
-          "merge": 1,
-          "read_plan": 1,
           "fork": 1,
-          "synthesize": 1,
+          "start": 1,
           "synthesis_gate": 1,
-          "start": 1
+          "read_plan": 1,
+          "publish_ready": 1,
+          "synthesize": 1,
+          "merge": 1
         }
       },
-      "diff": {}
+      "diff": {
+        "patch": "diff --git a/docs/iterations/005-true-north-agreement-flow/plan.md b/docs/iterations/005-true-north-agreement-flow/plan.md\nindex 34eefef..390becd 100644\n--- a/docs/iterations/005-true-north-agreement-flow/plan.md\n+++ b/docs/iterations/005-true-north-agreement-flow/plan.md\n@@ -1,7 +1,7 @@\n # True North Agreement Flow\n \n Date: 2026-05-29\n-Status: draft\n+Status: ready\n \n ## Goal\n \ndiff --git a/docs/iterations/README.md b/docs/iterations/README.md\nindex 15f868f..b8d0221 100644\n--- a/docs/iterations/README.md\n+++ b/docs/iterations/README.md\n@@ -6,6 +6,6 @@\n | 002 | Structured interview without LLM | [plan](002-structured-interview/plan.md) | 2026-05-27 | implemented | None yet |\n | 003 | LLM-led conversational interview | [plan](003-llm-led-interview/plan.md) | 2026-05-27 | implemented | None yet |\n | 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | implemented | None yet |\n-| 005 | True North agreement flow | [plan](005-true-north-agreement-flow/plan.md) | 2026-05-29 | draft | None yet |\n+| 005 | True North agreement flow | [plan](005-true-north-agreement-flow/plan.md) | 2026-05-29 | ready | None yet |\n | 006 | Coherence and correlation assistance | TBD | TBD | proposed | None yet |\n | 007 | Tracking and review loop | TBD | TBD | proposed | None yet |\n",
+        "summary": {
+          "files_changed": 2,
+          "additions": 2,
+          "deletions": 2
+        }
+      }
     }
   ],
-  "conclusion": null,
+  "conclusion": {
+    "timestamp": "2026-05-29T07:10:41.622248342Z",
+    "status": "succeeded",
+    "timing": {
+      "wall_time_ms": 134039,
+      "inference_time_ms": 21867,
+      "tool_time_ms": 2027,
+      "active_time_ms": 23894
+    },
+    "final_git_commit_sha": "2ef08cd633d7c19e5d4281b407c877cb8faaff61",
+    "stages": [
+      {
+        "stage_id": "start",
+        "stage_label": "start",
+        "timing": {
+          "wall_time_ms": 0,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "read_plan",
+        "stage_label": "read_plan",
+        "timing": {
+          "wall_time_ms": 159,
+          "inference_time_ms": 0,
+          "tool_time_ms": 154,
+          "active_time_ms": 154
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "fork",
+        "stage_label": "fork",
+        "timing": {
+          "wall_time_ms": 90227,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "billing_usd_micros": 92487,
+        "retries": 0
+      },
+      {
+        "stage_id": "merge",
+        "stage_label": "merge",
+        "timing": {
+          "wall_time_ms": 52,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "synthesize",
+        "stage_label": "synthesize",
+        "timing": {
+          "wall_time_ms": 21912,
+          "inference_time_ms": 21867,
+          "tool_time_ms": 0,
+          "active_time_ms": 21867
+        },
+        "billing_usd_micros": 70498,
+        "retries": 0
+      },
+      {
+        "stage_id": "synthesis_gate",
+        "stage_label": "synthesis_gate",
+        "timing": {
+          "wall_time_ms": 0,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "publish_ready",
+        "stage_label": "publish_ready",
+        "timing": {
+          "wall_time_ms": 1878,
+          "inference_time_ms": 0,
+          "tool_time_ms": 1873,
+          "active_time_ms": 1873
+        },
+        "retries": 0
+      }
+    ],
+    "billing": {
+      "input_tokens": 3404,
+      "output_tokens": 5087,
+      "total_tokens": 21363,
+      "reasoning_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 12872,
+      "total_usd_micros": 162985
+    },
+    "total_retries": 0,
+    "diff": {}
+  },
   "sandbox": {
     "provider": "docker",
     "image": "buildpack-deps:noble",
@@ -1545,43 +1655,6 @@
       },
       "state": "succeeded"
     },
-    "publish_ready@1": {
-      "first_event_seq": 91,
-      "prompt": null,
-      "response": null,
-      "completion": null,
-      "provider_used": null,
-      "diff": null,
-      "script_invocation": {
-        "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
-        "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
-        "language": "shell"
-      },
-      "script_timing": {
-        "output": "blob://sha256/b6b972c2683b2f960ef3c750e5c26a490ffb0bc11e33b86af90dd6223a0eb116",
-        "exit_code": 0,
-        "duration_ms": 1873,
-        "termination": "exited",
-        "output_bytes": 354,
-        "live_streaming": true
-      },
-      "parallel_results": null,
-      "output": null,
-      "output_bytes": 354,
-      "live_streaming": true,
-      "termination": "exited",
-      "started_at": "2026-05-29T07:10:36.824483459Z",
-      "handler": "command",
-      "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
-        "reasoning_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_write_tokens": 0
-      },
-      "state": "running"
-    },
     "synthesize@1": {
       "first_event_seq": 73,
       "prompt": null,
@@ -1626,40 +1699,6 @@
       },
       "state": "succeeded"
     },
-    "start@1": {
-      "first_event_seq": 17,
-      "prompt": null,
-      "response": null,
-      "completion": {
-        "outcome": "succeeded",
-        "notes": null,
-        "failure_reason": null,
-        "timestamp": "2026-05-29T07:08:29.264937483Z"
-      },
-      "provider_used": null,
-      "diff": null,
-      "script_invocation": null,
-      "script_timing": null,
-      "parallel_results": null,
-      "output": null,
-      "started_at": "2026-05-29T07:08:29.264778127Z",
-      "handler": "start",
-      "timing": {
-        "wall_time_ms": 0,
-        "inference_time_ms": 0,
-        "tool_time_ms": 0,
-        "active_time_ms": 0
-      },
-      "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
-        "reasoning_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_write_tokens": 0
-      },
-      "state": "succeeded"
-    },
     "merge@1": {
       "first_event_seq": 65,
       "prompt": null,
@@ -1680,6 +1719,88 @@
       "handler": "parallel.fan_in",
       "timing": {
         "wall_time_ms": 52,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
+    "publish_ready@1": {
+      "first_event_seq": 91,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Script completed: .fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T07:10:38.703254044Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": {
+        "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
+        "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
+        "language": "shell"
+      },
+      "script_timing": {
+        "output": "blob://sha256/b6b972c2683b2f960ef3c750e5c26a490ffb0bc11e33b86af90dd6223a0eb116",
+        "exit_code": 0,
+        "duration_ms": 1873,
+        "termination": "exited",
+        "output_bytes": 354,
+        "live_streaming": true
+      },
+      "parallel_results": null,
+      "output": null,
+      "output_bytes": 354,
+      "live_streaming": true,
+      "termination": "exited",
+      "started_at": "2026-05-29T07:10:36.824483459Z",
+      "handler": "command",
+      "timing": {
+        "wall_time_ms": 1878,
+        "inference_time_ms": 0,
+        "tool_time_ms": 1873,
+        "active_time_ms": 1873
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
+    "start@1": {
+      "first_event_seq": 17,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": null,
+        "failure_reason": null,
+        "timestamp": "2026-05-29T07:08:29.264937483Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T07:08:29.264778127Z",
+      "handler": "start",
+      "timing": {
+        "wall_time_ms": 0,
         "inference_time_ms": 0,
         "tool_time_ms": 0,
         "active_time_ms": 0
@@ -1799,6 +1920,40 @@
       "model": {
         "provider": "anthropic",
         "model_id": "claude-sonnet-4-5"
+      },
+      "state": "succeeded"
+    },
+    "exit@1": {
+      "first_event_seq": 101,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": null,
+        "failure_reason": null,
+        "timestamp": "2026-05-29T07:10:41.607708648Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T07:10:41.607695847Z",
+      "handler": "exit",
+      "timing": {
+        "wall_time_ms": 0,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
       },
       "state": "succeeded"
     }

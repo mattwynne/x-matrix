@@ -1,0 +1,6 @@
+{
+  "outcome": "succeeded",
+  "notes": "Script completed: .fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'",
+  "failure_reason": null,
+  "timestamp": "2026-05-29T07:10:38.703254044Z"
+}
