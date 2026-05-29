@@ -1,0 +1,673 @@
+{
+  "title": "Validate that an iteration plan is ready for implementation",
+  "spec": {
+    "run_id": "01KSS9057WAZTY03MHHQR8D0PY",
+    "settings": {
+      "project": {
+        "name": null,
+        "description": null,
+        "metadata": {}
+      },
+      "workflow": {
+        "name": null,
+        "description": null,
+        "graph": "workflow.fabro",
+        "metadata": {}
+      },
+      "run": {
+        "goal": {
+          "type": "inline",
+          "value": "Validate that an iteration plan is ready for implementation"
+        },
+        "working_dir": null,
+        "metadata": {},
+        "inputs": {
+          "plan_path": "docs/iterations/005-true-north-agreement-flow/plan.md"
+        },
+        "model": {
+          "provider": "openai",
+          "name": "gpt-5.5",
+          "fallbacks": [],
+          "controls": {
+            "reasoning_effort": null,
+            "speed": null
+          }
+        },
+        "git": {
+          "author": null
+        },
+        "prepare": {
+          "commands": [],
+          "timeout_ms": 300000
+        },
+        "execution": {
+          "mode": "normal",
+          "approval": "prompt"
+        },
+        "checkpoint": {
+          "exclude_globs": [],
+          "skip_git_hooks": false
+        },
+        "clone": {
+          "enabled": true
+        },
+        "run_branch": {
+          "enabled": true,
+          "push": true
+        },
+        "meta_branch": {
+          "enabled": true,
+          "push": true
+        },
+        "environment": {
+          "id": "default",
+          "provider": "docker",
+          "image": {
+            "ref": "buildpack-deps:noble",
+            "dockerfile": null
+          },
+          "resources": {
+            "cpu": 2,
+            "memory": "4GB",
+            "disk": null
+          },
+          "network": {
+            "mode": "allow_all",
+            "allow": []
+          },
+          "lifecycle": {
+            "preserve": false,
+            "stop_on_terminal": true,
+            "auto_stop": null
+          },
+          "labels": {},
+          "volumes": [],
+          "env": {}
+        },
+        "notifications": {},
+        "interviews": {
+          "provider": null,
+          "slack": null
+        },
+        "agent": {
+          "fabro_tools": false,
+          "permissions": null,
+          "mcps": {}
+        },
+        "hooks": [],
+        "scm": {
+          "provider": null,
+          "owner": null,
+          "repository": null,
+          "github": null
+        },
+        "pull_request": null,
+        "artifacts": {
+          "include": []
+        },
+        "integrations": {
+          "github": {
+            "permissions": {}
+          }
+        }
+      }
+    },
+    "graph": {
+      "name": "PlanValidation",
+      "nodes": {
+        "read_updated_plan": {
+          "id": "read_updated_plan",
+          "attrs": {
+            "label": {
+              "String": "Read Updated Plan"
+            },
+            "shape": {
+              "String": "parallelogram"
+            },
+            "script": {
+              "String": "PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found after Codex update: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'UPDATED PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,320p' \"$PLAN_PATH\""
+            },
+            "reasoning_effort": {
+              "String": "low"
+            }
+          }
+        },
+        "codex_update": {
+          "id": "codex_update",
+          "attrs": {
+            "provider": {
+              "String": "openai"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "label": {
+              "String": "Codex Updates Plan"
+            },
+            "prompt": {
+              "String": "You are Codex updating an iteration plan file after Opus has identified obvious fixes.\n\nUse the context from:\n\n- The original plan read stage\n- Gemini review\n- Claude review\n- Codex/GPT review\n- Opus Synthesis & Repair Brief\n- Any previous Opus Recheck stages if this is a later loop pass\n\nEdit the plan file at `docs/iterations/005-true-north-agreement-flow/plan.md` directly.\n\nRules:\n\n1. Make only the obvious edits Opus requested.\n2. Preserve the author's intent and structure where possible.\n3. Do not invent product policy, scope, UX, domain, data-model, integration, or technical-design decisions.\n4. Do not add speculative answers to open questions.\n5. Do not edit app code or unrelated files.\n6. If an Opus instruction cannot be applied without making a judgment call, leave the plan unchanged for that point and report that it needs Matt.\n\nGood edits include tightening wording, reorganizing existing content, converting already-stated expectations into objective acceptance criteria, making clearly implied boundaries explicit, and removing obvious duplication or contradiction.\n\nAfter editing, return a Markdown report with:\n\n- Files changed\n- Summary of edits\n- Which Opus instructions were applied\n- Any instructions you skipped because they require Matt's judgment\n- Anything Opus should pay special attention to in the recheck"
+            },
+            "model": {
+              "String": "gpt-5.3-codex"
+            }
+          }
+        },
+        "fork": {
+          "id": "fork",
+          "attrs": {
+            "max_parallel": {
+              "Integer": 3
+            },
+            "label": {
+              "String": "Independent Model Reviews"
+            },
+            "join_policy": {
+              "String": "wait_all"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "shape": {
+              "String": "component"
+            }
+          }
+        },
+        "start": {
+          "id": "start",
+          "attrs": {
+            "label": {
+              "String": "Start"
+            },
+            "shape": {
+              "String": "Mdiamond"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            }
+          }
+        },
+        "codex_review": {
+          "id": "codex_review",
+          "attrs": {
+            "model": {
+              "String": "gpt-5.3-codex"
+            },
+            "shape": {
+              "String": "tab"
+            },
+            "label": {
+              "String": "Codex/GPT Review"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "provider": {
+              "String": "openai"
+            },
+            "prompt": {
+              "String": "You are independently reviewing an iteration plan before implementation.\n\nUse the plan text from the preceding `Read Iteration Plan` stage. Do not assume any missing details. Be strict, practical, and specific.\n\nReview the plan against these readiness questions:\n\n1. Goal clarity\n   - Is the goal clearly articulated?\n   - Does it state the user/business outcome, not just tasks?\n   - Is the intended beneficiary or actor clear?\n\n2. Scope focus\n   - Is the scope focused on one coherent outcome?\n   - Could the iteration be any smaller while still useful?\n   - Are non-goals and boundaries clear?\n\n3. Acceptance criteria and business decisions\n   - Are acceptance criteria concrete, clear, complete, and objectively testable?\n   - Do they cover happy paths, important edge cases, permissions, error states, and data/state changes where relevant?\n   - Are any business, product, policy, copy, workflow, or domain decisions still unresolved?\n\n4. Implementation plan and technical decisions\n   - Are implementation steps clear, ordered, and specific?\n   - Are likely files, modules, migrations, tests, interfaces, and integration points named where useful?\n   - Are data model, API, UI, workflow, integration, and background-job changes clear enough?\n   - Are any technical decisions still unresolved?\n\n5. Expected capability and validation\n   - What should we be able to do after this iteration that we cannot do now?\n   - How will we prove success?\n   - Is there a clear stop condition?\n\nReturn a Markdown report with:\n\n- Decision: READY or NOT READY\n- Confidence: High, Medium, or Low\n- Blocking gaps: numbered list\n- Non-blocking improvements: numbered list\n- Smallest viable iteration: your recommended smallest useful slice\n- Required plan edits: concrete edits the author should make\n- Validation plan: how to prove the iteration succeeded\n"
+            }
+          }
+        },
+        "merge": {
+          "id": "merge",
+          "attrs": {
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "label": {
+              "String": "Merge Reviews"
+            },
+            "shape": {
+              "String": "tripleoctagon"
+            }
+          }
+        },
+        "opus_recheck": {
+          "id": "opus_recheck",
+          "attrs": {
+            "prompt": {
+              "String": "You are Claude Opus performing the post-fix readiness check for an iteration plan.\n\nUse the context from:\n\n- The original plan read stage\n- The three independent model reviews\n- Your Opus Synthesis & Repair Brief\n- Codex Plan Update\n- The updated plan text from the latest `Read Updated Plan` stage\n- Any previous recheck reports if this is a later loop pass\n\nYour job is to check the updated plan, decide whether it is ready, and decide whether another Codex edit pass is justified.\n\nReadiness standard:\n\nA plan is READY only if an engineer can begin implementation without first resolving material product/business decisions or material technical design decisions, and if a reviewer can objectively validate success at the end.\n\nA plan is NOT READY if any of these are true:\n\n- The goal is materially ambiguous.\n- The scope is too broad or lacks a smallest useful slice.\n- Acceptance criteria are not concrete/testable enough.\n- Important business decisions remain open.\n- Implementation steps require major technical choices that are not made.\n- The expected new capability or success validation is unclear.\n\nCorrection policy:\n\nOnly request another Codex pass for obvious editorial/structural edits that do not require judgment calls. Examples: tightening wording, reorganizing existing content, converting already-stated expectations into objective acceptance criteria, or making clearly implied boundaries explicit.\n\nDo not ask Codex to invent product policy, scope, UX, domain, data-model, integration, or technical-design decisions. If remaining issues need Matt's judgment, fail the validation and list the questions for Matt.\n\nRecheck instructions:\n\n1. Compare the updated plan against your repair brief.\n2. Verify that Codex actually updated the plan file, not just described changes.\n3. Do not penalize the plan for non-blocking polish.\n4. If remaining problems are only obvious edits, set `plan_needs_fix` to true and give Codex exact follow-up instructions.\n5. If remaining problems require Matt's input, set `plan_needs_fix` to false and explain the unresolved decisions/questions.\n6. If the plan is ready, set `plan_ready` to true and `plan_needs_fix` to false.\n\nReturn a concise Markdown report with:\n\n1. Decision: READY or NOT READY\n2. Confidence: High, Medium, or Low\n3. What Codex fixed successfully\n4. Remaining blocking gaps, if any\n5. Follow-up repair instructions for Codex, only if another obvious edit pass is worthwhile\n6. Questions for Matt, if any\n7. Final validation plan: how we will know the iteration succeeded\n\nAt the end of your response, include one final JSON object for workflow routing. It must be the last thing in the response.\n\nIf READY:\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}\n\nIf NOT READY but another obvious Codex edit pass should be attempted:\n\n{\"context_updates\":{\"plan_ready\":false,\"plan_needs_fix\":true,\"plan_needs_human\":false}}\n\nIf NOT READY because remaining gaps require Matt's input or should stop the loop:\n\n{\"context_updates\":{\"plan_ready\":false,\"plan_needs_fix\":false,\"plan_needs_human\":true}}\n"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "model": {
+              "String": "claude-opus-4-6"
+            },
+            "shape": {
+              "String": "tab"
+            },
+            "provider": {
+              "String": "anthropic"
+            },
+            "label": {
+              "String": "Opus Recheck"
+            }
+          }
+        },
+        "gemini_review": {
+          "id": "gemini_review",
+          "attrs": {
+            "label": {
+              "String": "Gemini Review"
+            },
+            "provider": {
+              "String": "gemini"
+            },
+            "prompt": {
+              "String": "You are independently reviewing an iteration plan before implementation.\n\nUse the plan text from the preceding `Read Iteration Plan` stage. Do not assume any missing details. Be strict, practical, and specific.\n\nReview the plan against these readiness questions:\n\n1. Goal clarity\n   - Is the goal clearly articulated?\n   - Does it state the user/business outcome, not just tasks?\n   - Is the intended beneficiary or actor clear?\n\n2. Scope focus\n   - Is the scope focused on one coherent outcome?\n   - Could the iteration be any smaller while still useful?\n   - Are non-goals and boundaries clear?\n\n3. Acceptance criteria and business decisions\n   - Are acceptance criteria concrete, clear, complete, and objectively testable?\n   - Do they cover happy paths, important edge cases, permissions, error states, and data/state changes where relevant?\n   - Are any business, product, policy, copy, workflow, or domain decisions still unresolved?\n\n4. Implementation plan and technical decisions\n   - Are implementation steps clear, ordered, and specific?\n   - Are likely files, modules, migrations, tests, interfaces, and integration points named where useful?\n   - Are data model, API, UI, workflow, integration, and background-job changes clear enough?\n   - Are any technical decisions still unresolved?\n\n5. Expected capability and validation\n   - What should we be able to do after this iteration that we cannot do now?\n   - How will we prove success?\n   - Is there a clear stop condition?\n\nReturn a Markdown report with:\n\n- Decision: READY or NOT READY\n- Confidence: High, Medium, or Low\n- Blocking gaps: numbered list\n- Non-blocking improvements: numbered list\n- Smallest viable iteration: your recommended smallest useful slice\n- Required plan edits: concrete edits the author should make\n- Validation plan: how to prove the iteration succeeded\n"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "model": {
+              "String": "gemini-3.1-pro-preview"
+            },
+            "shape": {
+              "String": "tab"
+            }
+          }
+        },
+        "exit": {
+          "id": "exit",
+          "attrs": {
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "shape": {
+              "String": "Msquare"
+            },
+            "label": {
+              "String": "Exit"
+            }
+          }
+        },
+        "not_ready": {
+          "id": "not_ready",
+          "attrs": {
+            "goal_gate": {
+              "Boolean": true
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "shape": {
+              "String": "parallelogram"
+            },
+            "script": {
+              "String": "echo 'Plan validation failed: the plan is not ready for implementation. See the Opus report for remaining gaps or decisions that need human input.' >&2\nexit 1"
+            },
+            "label": {
+              "String": "Fail: Plan Not Ready"
+            }
+          }
+        },
+        "synthesize": {
+          "id": "synthesize",
+          "attrs": {
+            "model": {
+              "String": "claude-opus-4-6"
+            },
+            "provider": {
+              "String": "anthropic"
+            },
+            "output_schema": {
+              "String": "routing"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "prompt": {
+              "String": "You are Claude Opus acting as the repair coordinator for an iteration plan validation loop.\n\nUse the plan text and the three independent model reviews in context:\n\n- Gemini review\n- Claude review\n- Codex/GPT review\n\nYour job in this stage is to decide whether the plan is ready, needs only obvious editorial/structural correction, or needs human product/technical decisions before it can be ready.\n\nReadiness standard:\n\nA plan is READY only if an engineer can begin implementation without first resolving material product/business decisions or material technical design decisions, and if a reviewer can objectively validate success at the end.\n\nA plan is NOT READY if any of these are true:\n\n- The goal is materially ambiguous.\n- The scope is too broad or lacks a smallest useful slice.\n- Acceptance criteria are not concrete/testable enough.\n- Important business decisions remain open.\n- Implementation steps require major technical choices that are not made.\n- The expected new capability or success validation is unclear.\n\nCorrection policy:\n\nCodex may only be asked to make obvious plan edits that do not require judgment calls, such as:\n\n- tightening wording without changing meaning\n- reorganizing existing content into clearer sections\n- turning already-stated expectations into objective acceptance criteria\n- making implicit boundaries explicit when the plan already clearly implies them\n- removing duplication or contradiction when the intended meaning is obvious\n\nDo not ask Codex to invent product policy, scope, UX, domain, data-model, integration, or technical-design decisions. If the plan needs those decisions, fail the validation and raise them for Matt.\n\nSynthesis instructions:\n\n1. Compare the three reviews.\n2. Identify consensus findings.\n3. Correct reviewer findings that are wrong, too vague, duplicated, or not actually blocking.\n4. Decide whether the plan is already ready, needs only obvious edits, or needs Matt's input.\n5. If only obvious edits are needed, produce a concrete repair brief for Codex.\n6. If Matt's input is needed, do not produce a repair brief as if Codex can solve it; list the decisions/questions clearly.\n\nReturn a Markdown report with:\n\n1. Provisional decision: READY, OBVIOUS FIXES NEEDED, or NEEDS MATT\n2. Consensus findings: 3-6 bullets\n3. Corrected findings: reviewer findings you changed, downgraded, combined, or rejected\n4. Blocking gaps: numbered list, each with why it blocks implementation\n5. Codex repair brief: exact instructions for obvious edits only, or \"None\"\n6. Questions for Matt: decisions that need human input, or \"None\"\n7. Validation checklist: what to check after any Codex update\n\nAt the end of your response, include one final JSON object for workflow routing. It must be the last thing in the response.\n\nIf the plan is already READY:\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}\n\nIf the plan is NOT READY but Codex should apply only obvious fixes:\n\n{\"context_updates\":{\"plan_ready\":false,\"plan_needs_fix\":true,\"plan_needs_human\":false}}\n\nIf the plan is NOT READY because Matt needs to answer questions or make decisions:\n\n{\"context_updates\":{\"plan_ready\":false,\"plan_needs_fix\":false,\"plan_needs_human\":true}}\n"
+            },
+            "label": {
+              "String": "Opus Synthesis & Repair Brief"
+            },
+            "shape": {
+              "String": "tab"
+            }
+          }
+        },
+        "read_plan": {
+          "id": "read_plan",
+          "attrs": {
+            "label": {
+              "String": "Read Iteration Plan"
+            },
+            "reasoning_effort": {
+              "String": "low"
+            },
+            "script": {
+              "String": "PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\""
+            },
+            "shape": {
+              "String": "parallelogram"
+            }
+          }
+        },
+        "publish_ready": {
+          "id": "publish_ready",
+          "attrs": {
+            "reasoning_effort": {
+              "String": "low"
+            },
+            "label": {
+              "String": "Publish Ready Plan"
+            },
+            "script": {
+              "String": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/005-true-north-agreement-flow/plan.md'"
+            },
+            "shape": {
+              "String": "parallelogram"
+            }
+          }
+        },
+        "synthesis_gate": {
+          "id": "synthesis_gate",
+          "attrs": {
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "label": {
+              "String": "Obvious fixes?"
+            },
+            "shape": {
+              "String": "diamond"
+            }
+          }
+        },
+        "claude_review": {
+          "id": "claude_review",
+          "attrs": {
+            "prompt": {
+              "String": "You are independently reviewing an iteration plan before implementation.\n\nUse the plan text from the preceding `Read Iteration Plan` stage. Do not assume any missing details. Be strict, practical, and specific.\n\nReview the plan against these readiness questions:\n\n1. Goal clarity\n   - Is the goal clearly articulated?\n   - Does it state the user/business outcome, not just tasks?\n   - Is the intended beneficiary or actor clear?\n\n2. Scope focus\n   - Is the scope focused on one coherent outcome?\n   - Could the iteration be any smaller while still useful?\n   - Are non-goals and boundaries clear?\n\n3. Acceptance criteria and business decisions\n   - Are acceptance criteria concrete, clear, complete, and objectively testable?\n   - Do they cover happy paths, important edge cases, permissions, error states, and data/state changes where relevant?\n   - Are any business, product, policy, copy, workflow, or domain decisions still unresolved?\n\n4. Implementation plan and technical decisions\n   - Are implementation steps clear, ordered, and specific?\n   - Are likely files, modules, migrations, tests, interfaces, and integration points named where useful?\n   - Are data model, API, UI, workflow, integration, and background-job changes clear enough?\n   - Are any technical decisions still unresolved?\n\n5. Expected capability and validation\n   - What should we be able to do after this iteration that we cannot do now?\n   - How will we prove success?\n   - Is there a clear stop condition?\n\nReturn a Markdown report with:\n\n- Decision: READY or NOT READY\n- Confidence: High, Medium, or Low\n- Blocking gaps: numbered list\n- Non-blocking improvements: numbered list\n- Smallest viable iteration: your recommended smallest useful slice\n- Required plan edits: concrete edits the author should make\n- Validation plan: how to prove the iteration succeeded\n"
+            },
+            "shape": {
+              "String": "tab"
+            },
+            "provider": {
+              "String": "anthropic"
+            },
+            "model": {
+              "String": "claude-sonnet-4-5"
+            },
+            "label": {
+              "String": "Claude Review"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            }
+          }
+        },
+        "recheck_gate": {
+          "id": "recheck_gate",
+          "attrs": {
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "label": {
+              "String": "Plan ready?"
+            },
+            "shape": {
+              "String": "diamond"
+            }
+          }
+        },
+        "read_failed": {
+          "id": "read_failed",
+          "attrs": {
+            "goal_gate": {
+              "Boolean": true
+            },
+            "script": {
+              "String": "echo 'Plan validation failed: the plan file could not be read. Fix plan_path or make the plan visible to the sandbox, then retry.' >&2\nexit 1"
+            },
+            "label": {
+              "String": "Fail: Plan Missing"
+            },
+            "reasoning_effort": {
+              "String": "high"
+            },
+            "shape": {
+              "String": "parallelogram"
+            }
+          }
+        }
+      },
+      "edges": [
+        {
+          "from": "start",
+          "to": "read_plan",
+          "attrs": {}
+        },
+        {
+          "from": "read_plan",
+          "to": "fork",
+          "attrs": {
+            "condition": {
+              "String": "outcome=succeeded"
+            }
+          }
+        },
+        {
+          "from": "read_plan",
+          "to": "read_failed",
+          "attrs": {}
+        },
+        {
+          "from": "read_failed",
+          "to": "exit",
+          "attrs": {}
+        },
+        {
+          "from": "fork",
+          "to": "gemini_review",
+          "attrs": {}
+        },
+        {
+          "from": "fork",
+          "to": "claude_review",
+          "attrs": {}
+        },
+        {
+          "from": "fork",
+          "to": "codex_review",
+          "attrs": {}
+        },
+        {
+          "from": "gemini_review",
+          "to": "merge",
+          "attrs": {}
+        },
+        {
+          "from": "claude_review",
+          "to": "merge",
+          "attrs": {}
+        },
+        {
+          "from": "codex_review",
+          "to": "merge",
+          "attrs": {}
+        },
+        {
+          "from": "merge",
+          "to": "synthesize",
+          "attrs": {}
+        },
+        {
+          "from": "synthesize",
+          "to": "synthesis_gate",
+          "attrs": {}
+        },
+        {
+          "from": "synthesis_gate",
+          "to": "publish_ready",
+          "attrs": {
+            "label": {
+              "String": "Already ready"
+            },
+            "condition": {
+              "String": "plan_ready=true"
+            }
+          }
+        },
+        {
+          "from": "synthesis_gate",
+          "to": "codex_update",
+          "attrs": {
+            "label": {
+              "String": "Apply obvious fixes"
+            },
+            "condition": {
+              "String": "plan_needs_fix=true"
+            }
+          }
+        },
+        {
+          "from": "synthesis_gate",
+          "to": "not_ready",
+          "attrs": {
+            "label": {
+              "String": "Needs human input"
+            }
+          }
+        },
+        {
+          "from": "codex_update",
+          "to": "read_updated_plan",
+          "attrs": {}
+        },
+        {
+          "from": "read_updated_plan",
+          "to": "opus_recheck",
+          "attrs": {}
+        },
+        {
+          "from": "opus_recheck",
+          "to": "recheck_gate",
+          "attrs": {}
+        },
+        {
+          "from": "recheck_gate",
+          "to": "publish_ready",
+          "attrs": {
+            "label": {
+              "String": "Ready"
+            },
+            "condition": {
+              "String": "plan_ready=true"
+            }
+          }
+        },
+        {
+          "from": "recheck_gate",
+          "to": "codex_update",
+          "attrs": {
+            "condition": {
+              "String": "plan_needs_fix=true && context.internal.node_visit_count < 3"
+            },
+            "label": {
+              "String": "Fix again"
+            }
+          }
+        },
+        {
+          "from": "recheck_gate",
+          "to": "not_ready",
+          "attrs": {
+            "label": {
+              "String": "Not ready"
+            }
+          }
+        },
+        {
+          "from": "publish_ready",
+          "to": "exit",
+          "attrs": {}
+        },
+        {
+          "from": "not_ready",
+          "to": "exit",
+          "attrs": {}
+        }
+      ],
+      "attrs": {
+        "default_fidelity": {
+          "String": "summary:high"
+        },
+        "goal": {
+          "String": "Validate that an iteration plan is ready for implementation"
+        },
+        "model_stylesheet": {
+          "String": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        "
+        },
+        "rankdir": {
+          "String": "LR"
+        }
+      }
+    },
+    "graph_source": "digraph PlanValidation {\n    graph [\n        goal=\"Rigorously validate the iteration plan at {{ inputs.plan_path }} and decide whether it is ready for implementation\",\n        default_fidelity=\"summary:high\",\n        model_stylesheet=\"\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        \"\n    ]\n    rankdir=LR\n\n    start [shape=Mdiamond, label=\"Start\"]\n    exit  [shape=Msquare, label=\"Exit\"]\n\n    read_plan [\n        label=\"Read Iteration Plan\",\n        shape=parallelogram,\n        script=\"PLAN_PATH='{{ inputs.plan_path }}'\\nif [ ! -f \\\"$PLAN_PATH\\\" ]; then\\n  echo \\\"Plan file not found: $PLAN_PATH\\\" >&2\\n  exit 1\\nfi\\nprintf 'PLAN_PATH=%s\\\\n\\\\n' \\\"$PLAN_PATH\\\"\\nsed -n '1,260p' \\\"$PLAN_PATH\\\"\"\n    ]\n\n    read_failed [\n        label=\"Fail: Plan Missing\",\n        shape=parallelogram,\n        goal_gate=true,\n        script=\"echo 'Plan validation failed: the plan file could not be read. Fix plan_path or make the plan visible to the sandbox, then retry.' >&2\\nexit 1\"\n    ]\n\n    fork [label=\"Independent Model Reviews\", shape=component, join_policy=\"wait_all\", max_parallel=3]\n\n    gemini_review [\n        label=\"Gemini Review\",\n        shape=tab,\n        prompt=\"@prompts/review.md\"\n    ]\n\n    claude_review [\n        label=\"Claude Review\",\n        shape=tab,\n        prompt=\"@prompts/review.md\"\n    ]\n\n    codex_review [\n        label=\"Codex/GPT Review\",\n        shape=tab,\n        prompt=\"@prompts/review.md\"\n    ]\n\n    merge [label=\"Merge Reviews\", shape=tripleoctagon]\n\n    synthesize [\n        label=\"Opus Synthesis & Repair Brief\",\n        shape=tab,\n        output_schema=\"routing\",\n        prompt=\"@prompts/synthesize.md\"\n    ]\n\n    synthesis_gate [shape=diamond, label=\"Obvious fixes?\"]\n\n    codex_update [\n        label=\"Codex Updates Plan\",\n        prompt=\"@prompts/apply_fixes.md\"\n    ]\n\n    read_updated_plan [\n        label=\"Read Updated Plan\",\n        shape=parallelogram,\n        script=\"PLAN_PATH='{{ inputs.plan_path }}'\\nif [ ! -f \\\"$PLAN_PATH\\\" ]; then\\n  echo \\\"Plan file not found after Codex update: $PLAN_PATH\\\" >&2\\n  exit 1\\nfi\\nprintf 'UPDATED PLAN_PATH=%s\\\\n\\\\n' \\\"$PLAN_PATH\\\"\\nsed -n '1,320p' \\\"$PLAN_PATH\\\"\"\n    ]\n\n    opus_recheck [\n        label=\"Opus Recheck\",\n        shape=tab,\n        prompt=\"@prompts/recheck.md\"\n    ]\n\n    recheck_gate [shape=diamond, label=\"Plan ready?\"]\n\n    publish_ready [\n        label=\"Publish Ready Plan\",\n        shape=parallelogram,\n        script=\".fabro/workflows/plan-validation/scripts/publish_ready.sh '{{ inputs.plan_path }}'\"\n    ]\n\n    not_ready [\n        label=\"Fail: Plan Not Ready\",\n        shape=parallelogram,\n        goal_gate=true,\n        script=\"echo 'Plan validation failed: the plan is not ready for implementation. See the Opus report for remaining gaps or decisions that need human input.' >&2\\nexit 1\"\n    ]\n\n    start -> read_plan\n    read_plan -> fork [condition=\"outcome=succeeded\"]\n    read_plan -> read_failed\n    read_failed -> exit\n    fork -> gemini_review\n    fork -> claude_review\n    fork -> codex_review\n    gemini_review -> merge\n    claude_review -> merge\n    codex_review -> merge\n    merge -> synthesize\n    synthesize -> synthesis_gate\n    synthesis_gate -> publish_ready [label=\"Already ready\", condition=\"plan_ready=true\"]\n    synthesis_gate -> codex_update [label=\"Apply obvious fixes\", condition=\"plan_needs_fix=true\"]\n    synthesis_gate -> not_ready [label=\"Needs human input\"]\n    codex_update -> read_updated_plan\n    read_updated_plan -> opus_recheck\n    opus_recheck -> recheck_gate\n    recheck_gate -> publish_ready [label=\"Ready\", condition=\"plan_ready=true\"]\n    recheck_gate -> codex_update [label=\"Fix again\", condition=\"plan_needs_fix=true && context.internal.node_visit_count < 3\"]\n    recheck_gate -> not_ready [label=\"Not ready\"]\n    publish_ready -> exit\n    not_ready -> exit\n}\n",
+    "workflow_slug": "plan-validation",
+    "source_directory": "/Users/matt/git/mattwynne/x-matrix",
+    "provenance": {
+      "server": {
+        "version": "0.245.0-nightly.0"
+      },
+      "client": {
+        "user_agent": "fabro-cli/0.243.0-nightly.1",
+        "name": "fabro-cli",
+        "version": "0.243.0-nightly.1"
+      },
+      "subject": {
+        "kind": "user",
+        "identity": {
+          "issuer": "fabro:dev",
+          "subject": "dev"
+        },
+        "login": "dev",
+        "auth_method": "dev_token"
+      }
+    },
+    "manifest_blob": "7169224722232a91ae97db1ccb3f5c7be023622501cb7dfa157e8f24d72aa144",
+    "definition_blob": "d37206777a1095cb6618f43618a4aa0ad57ce93b5c2956fcfe9d58f2a940c746",
+    "git": {
+      "origin_url": "https://github.com/mattwynne/x-matrix",
+      "branch": "main",
+      "sha": "13094cf3b863071faa56f299d02acbdae485efc0",
+      "dirty": "clean",
+      "push_outcome": {
+        "type": "not_attempted"
+      }
+    }
+  },
+  "web_url": "https://fabro.home.wynne.family/runs/01KSS9057WAZTY03MHHQR8D0PY",
+  "start": null,
+  "status": {
+    "kind": "starting"
+  },
+  "status_updated_at": "2026-05-29T07:08:25.810729329Z",
+  "last_event_at": "2026-05-29T07:08:27.266432833Z",
+  "pending_control": null,
+  "checkpoints": [],
+  "conclusion": null,
+  "sandbox": {
+    "provider": "docker",
+    "image": "buildpack-deps:noble",
+    "runtime": {
+      "id": "86cde39e8f20d0b98abd6a7e7a7d2f3d3851882e7b6c884eec0abba5ef5e3e91",
+      "working_directory": "/workspace/x-matrix",
+      "repo_cloned": true,
+      "clone_origin_url": "https://github.com/mattwynne/x-matrix",
+      "clone_branch": "main",
+      "workspace_root": "/workspace",
+      "repos_root": "/repos",
+      "primary_repo_path": "/repos/mattwynne/x-matrix",
+      "primary_repo_link": "/workspace/x-matrix"
+    }
+  },
+  "pull_request": null,
+  "superseded_by": null,
+  "pending_interviews": {},
+  "stages": {}
+}
