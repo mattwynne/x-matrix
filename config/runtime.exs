@@ -25,6 +25,8 @@ config :x_matrix, XMatrixWeb.Endpoint,
 
 if config_env() != :test do
   config :x_matrix,
+    openrouter_api_key: System.get_env("OPENROUTER_API_KEY"),
+    openrouter_model: System.get_env("OPENROUTER_MODEL", "openai/gpt-oss-120b:free"),
     anthropic_api_key: System.get_env("ANTHROPIC_API_KEY"),
     anthropic_model: System.get_env("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
 end

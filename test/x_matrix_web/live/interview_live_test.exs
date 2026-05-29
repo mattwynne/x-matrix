@@ -1,5 +1,5 @@
 defmodule XMatrixWeb.InterviewLiveTest do
-  use XMatrixWeb.ConnCase, async: true
+  use XMatrixWeb.ConnCase, async: false
 
   alias XMatrix.Strategies
 
@@ -41,10 +41,10 @@ defmodule XMatrixWeb.InterviewLiveTest do
   end
 
   test "AI mode treats free text as chat until Add my answer", %{conn: conn} do
-    previous_key = Application.get_env(:x_matrix, :anthropic_api_key)
-    Application.put_env(:x_matrix, :anthropic_api_key, "test-key")
+    previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
+    Application.put_env(:x_matrix, :openrouter_api_key, "test-key")
 
-    on_exit(fn -> Application.put_env(:x_matrix, :anthropic_api_key, previous_key) end)
+    on_exit(fn -> Application.put_env(:x_matrix, :openrouter_api_key, previous_key) end)
 
     {:ok, strategy} =
       Strategies.create_draft_strategy(%{
@@ -87,10 +87,10 @@ defmodule XMatrixWeb.InterviewLiveTest do
   end
 
   test "AI on without a key shows fallback notice and behaves like manual entry", %{conn: conn} do
-    previous_key = Application.get_env(:x_matrix, :anthropic_api_key)
-    Application.put_env(:x_matrix, :anthropic_api_key, nil)
+    previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
+    Application.put_env(:x_matrix, :openrouter_api_key, nil)
 
-    on_exit(fn -> Application.put_env(:x_matrix, :anthropic_api_key, previous_key) end)
+    on_exit(fn -> Application.put_env(:x_matrix, :openrouter_api_key, previous_key) end)
 
     {:ok, strategy} =
       Strategies.create_draft_strategy(%{
@@ -101,10 +101,39 @@ defmodule XMatrixWeb.InterviewLiveTest do
 
     conn
     |> visit("/interview/#{strategy.id}")
-    |> assert_has("div", text: "No Anthropic API key is configured")
+    |> assert_has("div", text: "No OpenRouter API key is configured")
     |> fill_in("Your answer", with: "Everyone has a home")
     |> click_button("Send")
     |> assert_has("#emerging-matrix", text: "Everyone has a home")
+  end
+
+  test "AI provider errors show a friendly fallback and continue with scripted guidance", %{
+    conn: conn
+  } do
+    previous_adapter = Application.get_env(:x_matrix, :llm_adapter)
+    previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
+
+    Application.put_env(:x_matrix, :llm_adapter, XMatrix.TestLLM.FailingAdapter)
+    Application.put_env(:x_matrix, :openrouter_api_key, "test-key")
+
+    on_exit(fn ->
+      Application.put_env(:x_matrix, :llm_adapter, previous_adapter)
+      Application.put_env(:x_matrix, :openrouter_api_key, previous_key)
+    end)
+
+    {:ok, strategy} =
+      Strategies.create_draft_strategy(%{
+        title: "S",
+        current_step: "chat:true_north",
+        ai_assisted: true
+      })
+
+    conn
+    |> visit("/interview/#{strategy.id}")
+    |> fill_in("Your answer", with: "Everyone has a home")
+    |> click_button("Send")
+    |> assert_has("div", text: "The AI facilitator was unavailable")
+    |> assert_has("#interview-transcript", text: "Everyone has a home")
   end
 
   test "a correlation source rates each target and saves", %{conn: conn} do

@@ -1,7 +1,7 @@
 # OpenRouter LLM Provider
 
 Date: 2026-05-28
-Status: ready
+Status: implemented
 
 ## Goal
 

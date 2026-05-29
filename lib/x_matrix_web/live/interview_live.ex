@@ -364,32 +364,32 @@ defmodule XMatrixWeb.InterviewLive do
   defp adapter_for(%{ai_assisted: false}), do: XMatrix.LLM.Scripted
 
   defp adapter_for(%{ai_assisted: true}) do
-    if anthropic_key?() do
-      Application.get_env(:x_matrix, :llm_adapter, XMatrix.LLM.Anthropic)
+    if openrouter_key?() do
+      Application.get_env(:x_matrix, :llm_adapter, XMatrix.LLM.OpenRouter)
     else
       XMatrix.LLM.Scripted
     end
   end
 
   defp fallback_notice(%{ai_assisted: true}) do
-    if anthropic_key?(),
+    if openrouter_key?(),
       do: nil,
-      else: "No Anthropic API key is configured, so this draft is using the free scripted guide."
+      else: "No OpenRouter API key is configured, so this draft is using the free scripted guide."
   end
 
   defp fallback_notice(_strategy), do: nil
 
-  defp effective_ai_assisted?(%{ai_assisted: true}), do: anthropic_key?()
+  defp effective_ai_assisted?(%{ai_assisted: true}), do: openrouter_key?()
   defp effective_ai_assisted?(_strategy), do: false
 
-  defp anthropic_key? do
-    case Application.get_env(:x_matrix, :anthropic_api_key) do
+  defp openrouter_key? do
+    case Application.get_env(:x_matrix, :openrouter_api_key) do
       key when is_binary(key) -> String.trim(key) != ""
       _ -> false
     end
   end
 
-  defp default_ai_assisted?, do: anthropic_key?()
+  defp default_ai_assisted?, do: openrouter_key?()
 
   @impl true
   def render(assigns) do

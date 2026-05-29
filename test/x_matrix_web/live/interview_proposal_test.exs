@@ -5,14 +5,14 @@ defmodule XMatrixWeb.InterviewProposalTest do
 
   setup do
     previous_adapter = Application.get_env(:x_matrix, :llm_adapter)
-    previous_key = Application.get_env(:x_matrix, :anthropic_api_key)
+    previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
 
     Application.put_env(:x_matrix, :llm_adapter, XMatrix.TestLLM.ProposingAdapter)
-    Application.put_env(:x_matrix, :anthropic_api_key, "test-key")
+    Application.put_env(:x_matrix, :openrouter_api_key, "test-key")
 
     on_exit(fn ->
       Application.put_env(:x_matrix, :llm_adapter, previous_adapter)
-      Application.put_env(:x_matrix, :anthropic_api_key, previous_key)
+      Application.put_env(:x_matrix, :openrouter_api_key, previous_key)
     end)
   end
 
