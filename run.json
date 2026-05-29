@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T02:26:05.359704938Z",
-  "last_event_at": "2026-05-29T02:28:47.222082676Z",
+  "last_event_at": "2026-05-29T02:28:50.521405115Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -1305,9 +1305,9 @@
       }
     },
     {
-      "seq": 0,
+      "seq": 98,
       "checkpoint": {
-        "timestamp": "2026-05-29T02:28:47.226857818Z",
+        "timestamp": "2026-05-29T02:28:50.521255137Z",
         "current_node": "publish_ready",
         "completed_nodes": [
           "start",
@@ -1320,8 +1320,23 @@
         ],
         "node_retries": {},
         "context_values": {
-          "internal.fidelity": "summary:high",
+          "thread.synthesize.current_node": "synthesis_gate",
+          "internal.retry_count.read_plan": 0,
+          "current_node": "publish_ready",
+          "internal.work_dir": "/workspace/x-matrix",
+          "internal.retry_count.start": 0,
+          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
+          "graph.default_fidelity": "summary:high",
+          "internal.retry_count.synthesis_gate": 0,
+          "internal.retry_count.synthesize": 0,
+          "internal.retry_count.publish_ready": 0,
+          "failure_class": "",
+          "thread.fork.current_node": "merge",
+          "plan_ready": true,
+          "outcome": "succeeded",
+          "graph.rankdir": "LR",
           "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete impleme",
+          "parallel.branch_count": 3,
           "parallel.results": [
             {
               "id": "gemini_review",
@@ -1339,43 +1354,33 @@
               "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
             }
           ],
-          "plan_ready": true,
-          "failure_signature": "",
-          "internal.retry_count.fork": 0,
-          "thread.read_plan.current_node": "fork",
-          "internal.retry_count.merge": 0,
-          "failure_class": "",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
           "graph.goal": "Validate that an iteration plan is ready for implementation",
-          "plan_needs_fix": false,
-          "internal.retry_count.publish_ready": 0,
+          "internal.thread_id": "synthesis_gate",
+          "parallel.fan_in.best_outcome": "succeeded",
+          "internal.retry_count.merge": 0,
+          "internal.node_visit_count": 1,
+          "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b",
+          "thread.read_plan.current_node": "fork",
+          "thread.start.current_node": "read_plan",
+          "thread.synthesis_gate.current_node": "publish_ready",
+          "thread.merge.current_node": "synthesize",
+          "internal.fidelity": "summary:high",
+          "last_stage": "synthesize",
+          "command.output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
           "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
           "parallel.fan_in.best_id": "claude_review",
-          "graph.default_fidelity": "summary:high",
-          "graph.rankdir": "LR",
-          "last_stage": "synthesize",
-          "internal.retry_count.synthesis_gate": 0,
-          "parallel.branch_count": 3,
-          "internal.thread_id": "synthesis_gate",
-          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
-          "internal.work_dir": "/workspace/x-matrix",
-          "outcome": "succeeded",
-          "parallel.fan_in.best_outcome": "succeeded",
-          "thread.synthesize.current_node": "synthesis_gate",
-          "current_node": "publish_ready",
-          "thread.fork.current_node": "merge",
-          "internal.retry_count.synthesize": 0,
-          "plan_needs_human": false,
-          "command.output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
-          "thread.synthesis_gate.current_node": "publish_ready",
-          "internal.retry_count.read_plan": 0,
-          "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b",
-          "internal.retry_count.start": 0,
-          "thread.start.current_node": "read_plan",
-          "internal.node_visit_count": 1,
-          "thread.merge.current_node": "synthesize",
-          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        "
+          "plan_needs_fix": false,
+          "internal.retry_count.fork": 0,
+          "failure_signature": "",
+          "plan_needs_human": false
         },
         "node_outcomes": {
+          "synthesis_gate": {
+            "status": "succeeded",
+            "notes": "Conditional node evaluated: synthesis_gate",
+            "usage": null
+          },
           "publish_ready": {
             "status": "succeeded",
             "context_updates": {
@@ -1431,6 +1436,24 @@
               "active_time_ms": 20030
             }
           },
+          "read_plan": {
+            "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/004-openrouter-llm-provider/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 256,
+              "active_time_ms": 256
+            }
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          },
           "merge": {
             "status": "succeeded",
             "context_updates": {
@@ -1447,29 +1470,6 @@
               "active_time_ms": 0
             }
           },
-          "start": {
-            "status": "succeeded",
-            "usage": null
-          },
-          "synthesis_gate": {
-            "status": "succeeded",
-            "notes": "Conditional node evaluated: synthesis_gate",
-            "usage": null
-          },
-          "read_plan": {
-            "status": "succeeded",
-            "context_updates": {
-              "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e"
-            },
-            "notes": "Script completed: PLAN_PATH='docs/iterations/004-openrouter-llm-provider/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
-            "usage": null,
-            "timing": {
-              "wall_time_ms": 0,
-              "inference_time_ms": 0,
-              "tool_time_ms": 256,
-              "active_time_ms": 256
-            }
-          },
           "fork": {
             "status": "succeeded",
             "jump_to_node": "merge",
@@ -1478,20 +1478,130 @@
           }
         },
         "next_node_id": "exit",
+        "git_commit_sha": "781aebf2446b9550d5c1093cc58671c44e248109",
         "node_visits": {
-          "synthesize": 1,
-          "start": 1,
           "read_plan": 1,
-          "fork": 1,
           "merge": 1,
+          "start": 1,
+          "publish_ready": 1,
           "synthesis_gate": 1,
-          "publish_ready": 1
+          "synthesize": 1,
+          "fork": 1
         }
       },
-      "diff": {}
+      "diff": {
+        "patch": "diff --git a/docs/iterations/004-openrouter-llm-provider/plan.md b/docs/iterations/004-openrouter-llm-provider/plan.md\nindex c3a58da..7834cbb 100644\n--- a/docs/iterations/004-openrouter-llm-provider/plan.md\n+++ b/docs/iterations/004-openrouter-llm-provider/plan.md\n@@ -1,7 +1,7 @@\n # OpenRouter LLM Provider\n \n Date: 2026-05-28\n-Status: draft\n+Status: ready\n \n ## Goal\n \ndiff --git a/docs/iterations/README.md b/docs/iterations/README.md\nindex 800d378..e17f42f 100644\n--- a/docs/iterations/README.md\n+++ b/docs/iterations/README.md\n@@ -5,7 +5,7 @@\n | 001 | Seeded read-only X-Matrix | [plan](001-seeded-read-only-x-matrix/plan.md) | 2026-05-26 | implemented | None |\n | 002 | Structured interview without LLM | [plan](002-structured-interview/plan.md) | 2026-05-27 | implemented | None yet |\n | 003 | LLM-led conversational interview | [plan](003-llm-led-interview/plan.md) | 2026-05-27 | implemented | None yet |\n-| 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | draft | None yet |\n+| 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | ready | None yet |\n | 005 | True North agreement flow | TBD | TBD | proposed | None yet |\n | 006 | Coherence and correlation assistance | TBD | TBD | proposed | None yet |\n | 007 | Tracking and review loop | TBD | TBD | proposed | None yet |\n",
+        "summary": {
+          "files_changed": 2,
+          "additions": 2,
+          "deletions": 2
+        }
+      }
     }
   ],
-  "conclusion": null,
+  "conclusion": {
+    "timestamp": "2026-05-29T02:28:50.550282406Z",
+    "status": "succeeded",
+    "timing": {
+      "wall_time_ms": 165175,
+      "inference_time_ms": 20030,
+      "tool_time_ms": 2401,
+      "active_time_ms": 22431
+    },
+    "final_git_commit_sha": "781aebf2446b9550d5c1093cc58671c44e248109",
+    "stages": [
+      {
+        "stage_id": "start",
+        "stage_label": "start",
+        "timing": {
+          "wall_time_ms": 0,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "read_plan",
+        "stage_label": "read_plan",
+        "timing": {
+          "wall_time_ms": 281,
+          "inference_time_ms": 0,
+          "tool_time_ms": 256,
+          "active_time_ms": 256
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "fork",
+        "stage_label": "fork",
+        "timing": {
+          "wall_time_ms": 117908,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "billing_usd_micros": 113022,
+        "retries": 0
+      },
+      {
+        "stage_id": "merge",
+        "stage_label": "merge",
+        "timing": {
+          "wall_time_ms": 107,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "synthesize",
+        "stage_label": "synthesize",
+        "timing": {
+          "wall_time_ms": 20139,
+          "inference_time_ms": 20030,
+          "tool_time_ms": 0,
+          "active_time_ms": 20030
+        },
+        "billing_usd_micros": 68588,
+        "retries": 0
+      },
+      {
+        "stage_id": "synthesis_gate",
+        "stage_label": "synthesis_gate",
+        "timing": {
+          "wall_time_ms": 1,
+          "inference_time_ms": 0,
+          "tool_time_ms": 0,
+          "active_time_ms": 0
+        },
+        "retries": 0
+      },
+      {
+        "stage_id": "publish_ready",
+        "stage_label": "publish_ready",
+        "timing": {
+          "wall_time_ms": 2158,
+          "inference_time_ms": 0,
+          "tool_time_ms": 2145,
+          "active_time_ms": 2145
+        },
+        "retries": 0
+      }
+    ],
+    "billing": {
+      "input_tokens": 3452,
+      "output_tokens": 6370,
+      "total_tokens": 22694,
+      "reasoning_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 12872,
+      "total_usd_micros": 181610
+    },
+    "total_retries": 0,
+    "diff": {}
+  },
   "sandbox": {
     "provider": "docker",
     "image": "buildpack-deps:noble",
@@ -1603,6 +1713,122 @@
       },
       "state": "succeeded"
     },
+    "merge@1": {
+      "first_event_seq": 65,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Selected best candidate: claude_review",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:28:14.938348270Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:28:14.830655220Z",
+      "handler": "parallel.fan_in",
+      "timing": {
+        "wall_time_ms": 107,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
+    "publish_ready@1": {
+      "first_event_seq": 91,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Script completed: .fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:28:47.222645573Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": {
+        "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+        "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+        "language": "shell"
+      },
+      "script_timing": {
+        "output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
+        "exit_code": 0,
+        "duration_ms": 2145,
+        "termination": "exited",
+        "output_bytes": 354,
+        "live_streaming": true
+      },
+      "parallel_results": null,
+      "output": null,
+      "output_bytes": 354,
+      "live_streaming": true,
+      "termination": "exited",
+      "started_at": "2026-05-29T02:28:45.063453147Z",
+      "handler": "command",
+      "timing": {
+        "wall_time_ms": 2158,
+        "inference_time_ms": 0,
+        "tool_time_ms": 2145,
+        "active_time_ms": 2145
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
+    "exit@1": {
+      "first_event_seq": 101,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": null,
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:28:50.521405115Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:28:50.521384166Z",
+      "handler": "exit",
+      "timing": {
+        "wall_time_ms": 0,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
     "fork@1": {
       "first_event_seq": 31,
       "prompt": null,
@@ -1663,15 +1889,15 @@
       },
       "state": "succeeded"
     },
-    "merge@1": {
-      "first_event_seq": 65,
+    "synthesis_gate@1": {
+      "first_event_seq": 83,
       "prompt": null,
       "response": null,
       "completion": {
         "outcome": "succeeded",
-        "notes": "Selected best candidate: claude_review",
+        "notes": "Conditional node evaluated: synthesis_gate",
         "failure_reason": null,
-        "timestamp": "2026-05-29T02:28:14.938348270Z"
+        "timestamp": "2026-05-29T02:28:41.532670894Z"
       },
       "provider_used": null,
       "diff": null,
@@ -1679,10 +1905,10 @@
       "script_timing": null,
       "parallel_results": null,
       "output": null,
-      "started_at": "2026-05-29T02:28:14.830655220Z",
-      "handler": "parallel.fan_in",
+      "started_at": "2026-05-29T02:28:41.530605722Z",
+      "handler": "conditional",
       "timing": {
-        "wall_time_ms": 107,
+        "wall_time_ms": 1,
         "inference_time_ms": 0,
         "tool_time_ms": 0,
         "active_time_ms": 0
@@ -1730,77 +1956,6 @@
         "cache_write_tokens": 0
       },
       "state": "succeeded"
-    },
-    "synthesis_gate@1": {
-      "first_event_seq": 83,
-      "prompt": null,
-      "response": null,
-      "completion": {
-        "outcome": "succeeded",
-        "notes": "Conditional node evaluated: synthesis_gate",
-        "failure_reason": null,
-        "timestamp": "2026-05-29T02:28:41.532670894Z"
-      },
-      "provider_used": null,
-      "diff": null,
-      "script_invocation": null,
-      "script_timing": null,
-      "parallel_results": null,
-      "output": null,
-      "started_at": "2026-05-29T02:28:41.530605722Z",
-      "handler": "conditional",
-      "timing": {
-        "wall_time_ms": 1,
-        "inference_time_ms": 0,
-        "tool_time_ms": 0,
-        "active_time_ms": 0
-      },
-      "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
-        "reasoning_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_write_tokens": 0
-      },
-      "state": "succeeded"
-    },
-    "publish_ready@1": {
-      "first_event_seq": 91,
-      "prompt": null,
-      "response": null,
-      "completion": null,
-      "provider_used": null,
-      "diff": null,
-      "script_invocation": {
-        "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
-        "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
-        "language": "shell"
-      },
-      "script_timing": {
-        "output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
-        "exit_code": 0,
-        "duration_ms": 2145,
-        "termination": "exited",
-        "output_bytes": 354,
-        "live_streaming": true
-      },
-      "parallel_results": null,
-      "output": null,
-      "output_bytes": 354,
-      "live_streaming": true,
-      "termination": "exited",
-      "started_at": "2026-05-29T02:28:45.063453147Z",
-      "handler": "command",
-      "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
-        "reasoning_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_write_tokens": 0
-      },
-      "state": "running"
     }
   }
 }

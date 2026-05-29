@@ -1,0 +1,26 @@
+diff --git a/docs/iterations/004-openrouter-llm-provider/plan.md b/docs/iterations/004-openrouter-llm-provider/plan.md
+index c3a58da..7834cbb 100644
+--- a/docs/iterations/004-openrouter-llm-provider/plan.md
++++ b/docs/iterations/004-openrouter-llm-provider/plan.md
+@@ -1,7 +1,7 @@
+ # OpenRouter LLM Provider
+ 
+ Date: 2026-05-28
+-Status: draft
++Status: ready
+ 
+ ## Goal
+ 
+diff --git a/docs/iterations/README.md b/docs/iterations/README.md
+index 800d378..e17f42f 100644
+--- a/docs/iterations/README.md
++++ b/docs/iterations/README.md
+@@ -5,7 +5,7 @@
+ | 001 | Seeded read-only X-Matrix | [plan](001-seeded-read-only-x-matrix/plan.md) | 2026-05-26 | implemented | None |
+ | 002 | Structured interview without LLM | [plan](002-structured-interview/plan.md) | 2026-05-27 | implemented | None yet |
+ | 003 | LLM-led conversational interview | [plan](003-llm-led-interview/plan.md) | 2026-05-27 | implemented | None yet |
+-| 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | draft | None yet |
++| 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | ready | None yet |
+ | 005 | True North agreement flow | TBD | TBD | proposed | None yet |
+ | 006 | Coherence and correlation assistance | TBD | TBD | proposed | None yet |
+ | 007 | Tracking and review loop | TBD | TBD | proposed | None yet |
