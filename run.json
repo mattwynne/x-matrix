@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T02:26:05.359704938Z",
-  "last_event_at": "2026-05-29T02:28:11.313641042Z",
+  "last_event_at": "2026-05-29T02:28:14.830655220Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -757,9 +757,9 @@
       }
     },
     {
-      "seq": 0,
+      "seq": 62,
       "checkpoint": {
-        "timestamp": "2026-05-29T02:28:11.433070081Z",
+        "timestamp": "2026-05-29T02:28:14.815186022Z",
         "current_node": "fork",
         "completed_nodes": [
           "start",
@@ -768,10 +768,104 @@
         ],
         "node_retries": {},
         "context_values": {
+          "failure_class": "",
+          "internal.retry_count.start": 0,
+          "internal.node_visit_count": 1,
+          "parallel.results": [
+            {
+              "id": "gemini_review",
+              "status": "succeeded",
+              "head_sha": "8db641eb64648a7dcfc459ca89e3b12f13d5a17b"
+            },
+            {
+              "id": "claude_review",
+              "status": "succeeded",
+              "head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            {
+              "id": "codex_review",
+              "status": "succeeded",
+              "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
+            }
+          ],
+          "graph.rankdir": "LR",
+          "failure_signature": "",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "parallel.branch_count": 3,
+          "current_node": "fork",
+          "internal.retry_count.read_plan": 0,
+          "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
+          "outcome": "succeeded",
+          "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
+          "internal.retry_count.fork": 0,
+          "internal.thread_id": "read_plan",
+          "thread.read_plan.current_node": "fork",
+          "thread.start.current_node": "read_plan",
+          "graph.default_fidelity": "summary:high",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
+          "internal.fidelity": "summary:high",
+          "internal.work_dir": "/workspace/x-matrix"
+        },
+        "node_outcomes": {
+          "read_plan": {
+            "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/004-openrouter-llm-provider/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 256,
+              "active_time_ms": 256
+            }
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          },
+          "fork": {
+            "status": "succeeded",
+            "jump_to_node": "merge",
+            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
+            "usage": null
+          }
+        },
+        "next_node_id": "merge",
+        "git_commit_sha": "53ccd6c8999d7fb4ce0a3063973ed5abba566d2e",
+        "node_visits": {
+          "start": 1,
+          "read_plan": 1,
+          "fork": 1
+        }
+      },
+      "diff": {
+        "summary": {
+          "files_changed": 0,
+          "additions": 0,
+          "deletions": 0
+        }
+      }
+    },
+    {
+      "seq": 0,
+      "checkpoint": {
+        "timestamp": "2026-05-29T02:28:14.942207958Z",
+        "current_node": "merge",
+        "completed_nodes": [
+          "start",
+          "read_plan",
+          "fork",
+          "merge"
+        ],
+        "node_retries": {},
+        "context_values": {
           "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
           "thread.start.current_node": "read_plan",
           "parallel.branch_count": 3,
-          "internal.thread_id": "read_plan",
+          "parallel.fan_in.best_id": "claude_review",
+          "internal.thread_id": "fork",
           "parallel.results": [
             {
               "id": "gemini_review",
@@ -792,11 +886,15 @@
           "internal.work_dir": "/workspace/x-matrix",
           "outcome": "succeeded",
           "failure_signature": "",
-          "current_node": "fork",
+          "parallel.fan_in.best_outcome": "succeeded",
+          "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b",
+          "current_node": "merge",
           "internal.retry_count.fork": 0,
+          "thread.fork.current_node": "merge",
           "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
           "thread.read_plan.current_node": "fork",
           "failure_class": "",
+          "internal.retry_count.merge": 0,
           "graph.goal": "Validate that an iteration plan is ready for implementation",
           "internal.retry_count.read_plan": 0,
           "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
@@ -830,13 +928,30 @@
             "jump_to_node": "merge",
             "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
             "usage": null
+          },
+          "merge": {
+            "status": "succeeded",
+            "context_updates": {
+              "parallel.fan_in.best_id": "claude_review",
+              "parallel.fan_in.best_outcome": "succeeded",
+              "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            "notes": "Selected best candidate: claude_review",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 0,
+              "active_time_ms": 0
+            }
           }
         },
-        "next_node_id": "merge",
+        "next_node_id": "synthesize",
         "node_visits": {
           "start": 1,
           "read_plan": 1,
-          "fork": 1
+          "fork": 1,
+          "merge": 1
         }
       },
       "diff": {}
@@ -862,40 +977,6 @@
   "superseded_by": null,
   "pending_interviews": {},
   "stages": {
-    "start@1": {
-      "first_event_seq": 17,
-      "prompt": null,
-      "response": null,
-      "completion": {
-        "outcome": "succeeded",
-        "notes": null,
-        "failure_reason": null,
-        "timestamp": "2026-05-29T02:26:07.324003637Z"
-      },
-      "provider_used": null,
-      "diff": null,
-      "script_invocation": null,
-      "script_timing": null,
-      "parallel_results": null,
-      "output": null,
-      "started_at": "2026-05-29T02:26:07.322009101Z",
-      "handler": "start",
-      "timing": {
-        "wall_time_ms": 1,
-        "inference_time_ms": 0,
-        "tool_time_ms": 0,
-        "active_time_ms": 0
-      },
-      "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
-        "reasoning_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_write_tokens": 0
-      },
-      "state": "succeeded"
-    },
     "read_plan@1": {
       "first_event_seq": 21,
       "prompt": null,
@@ -948,7 +1029,12 @@
       "first_event_seq": 31,
       "prompt": null,
       "response": null,
-      "completion": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:28:11.432548918Z"
+      },
       "provider_used": {
         "mode": "prompt",
         "provider": "gemini",
@@ -958,10 +1044,32 @@
       "diff": null,
       "script_invocation": null,
       "script_timing": null,
-      "parallel_results": null,
+      "parallel_results": [
+        {
+          "id": "gemini_review",
+          "status": "succeeded",
+          "head_sha": "8db641eb64648a7dcfc459ca89e3b12f13d5a17b"
+        },
+        {
+          "id": "claude_review",
+          "status": "succeeded",
+          "head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+        },
+        {
+          "id": "codex_review",
+          "status": "succeeded",
+          "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
+        }
+      ],
       "output": null,
       "started_at": "2026-05-29T02:26:13.519209678Z",
       "handler": "parallel",
+      "timing": {
+        "wall_time_ms": 117908,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
       "usage": {
         "input_tokens": 1418,
         "output_tokens": 5644,
@@ -975,7 +1083,64 @@
         "provider": "anthropic",
         "model_id": "claude-sonnet-4-5"
       },
+      "state": "succeeded"
+    },
+    "merge@1": {
+      "first_event_seq": 65,
+      "prompt": null,
+      "response": null,
+      "completion": null,
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:28:14.830655220Z",
+      "handler": "parallel.fan_in",
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
       "state": "running"
+    },
+    "start@1": {
+      "first_event_seq": 17,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": null,
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:26:07.324003637Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:26:07.322009101Z",
+      "handler": "start",
+      "timing": {
+        "wall_time_ms": 1,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
     }
   }
 }
