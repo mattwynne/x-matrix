@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T02:26:05.359704938Z",
-  "last_event_at": "2026-05-29T02:26:07.611969365Z",
+  "last_event_at": "2026-05-29T02:28:11.313641042Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -693,9 +693,9 @@
       "diff": {}
     },
     {
-      "seq": 0,
+      "seq": 28,
       "checkpoint": {
-        "timestamp": "2026-05-29T02:26:07.643861685Z",
+        "timestamp": "2026-05-29T02:26:13.272137929Z",
         "current_node": "read_plan",
         "completed_nodes": [
           "start",
@@ -703,14 +703,99 @@
         ],
         "node_retries": {},
         "context_values": {
+          "graph.rankdir": "LR",
+          "internal.retry_count.start": 0,
+          "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
+          "internal.fidelity": "summary:high",
+          "failure_class": "",
+          "outcome": "succeeded",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "current_node": "read_plan",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
+          "internal.node_visit_count": 1,
+          "internal.work_dir": "/workspace/x-matrix",
+          "internal.thread_id": "start",
+          "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
+          "thread.start.current_node": "read_plan",
+          "graph.default_fidelity": "summary:high",
+          "internal.retry_count.read_plan": 0,
+          "failure_signature": ""
+        },
+        "node_outcomes": {
+          "read_plan": {
+            "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/004-openrouter-llm-provider/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 256,
+              "active_time_ms": 256
+            }
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          }
+        },
+        "next_node_id": "fork",
+        "git_commit_sha": "336ff4ab41199d8166b9ab33b57bc2d40c709aba",
+        "node_visits": {
+          "start": 1,
+          "read_plan": 1
+        }
+      },
+      "diff": {
+        "summary": {
+          "files_changed": 0,
+          "additions": 0,
+          "deletions": 0
+        }
+      }
+    },
+    {
+      "seq": 0,
+      "checkpoint": {
+        "timestamp": "2026-05-29T02:28:11.433070081Z",
+        "current_node": "fork",
+        "completed_nodes": [
+          "start",
+          "read_plan",
+          "fork"
+        ],
+        "node_retries": {},
+        "context_values": {
           "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
           "thread.start.current_node": "read_plan",
-          "internal.thread_id": "start",
+          "parallel.branch_count": 3,
+          "internal.thread_id": "read_plan",
+          "parallel.results": [
+            {
+              "id": "gemini_review",
+              "status": "succeeded",
+              "head_sha": "8db641eb64648a7dcfc459ca89e3b12f13d5a17b"
+            },
+            {
+              "id": "claude_review",
+              "status": "succeeded",
+              "head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            {
+              "id": "codex_review",
+              "status": "succeeded",
+              "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
+            }
+          ],
           "internal.work_dir": "/workspace/x-matrix",
           "outcome": "succeeded",
           "failure_signature": "",
-          "current_node": "read_plan",
+          "current_node": "fork",
+          "internal.retry_count.fork": 0,
           "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
+          "thread.read_plan.current_node": "fork",
           "failure_class": "",
           "graph.goal": "Validate that an iteration plan is ready for implementation",
           "internal.retry_count.read_plan": 0,
@@ -739,12 +824,19 @@
               "tool_time_ms": 256,
               "active_time_ms": 256
             }
+          },
+          "fork": {
+            "status": "succeeded",
+            "jump_to_node": "merge",
+            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
+            "usage": null
           }
         },
-        "next_node_id": "fork",
+        "next_node_id": "merge",
         "node_visits": {
           "start": 1,
-          "read_plan": 1
+          "read_plan": 1,
+          "fork": 1
         }
       },
       "diff": {}
@@ -851,6 +943,39 @@
         "cache_write_tokens": 0
       },
       "state": "succeeded"
+    },
+    "fork@1": {
+      "first_event_seq": 31,
+      "prompt": null,
+      "response": null,
+      "completion": null,
+      "provider_used": {
+        "mode": "prompt",
+        "provider": "gemini",
+        "model": "gemini-3.1-pro-preview",
+        "reasoning_effort": "high"
+      },
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:26:13.519209678Z",
+      "handler": "parallel",
+      "usage": {
+        "input_tokens": 1418,
+        "output_tokens": 5644,
+        "total_tokens": 13491,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 6429,
+        "total_usd_micros": 113022
+      },
+      "model": {
+        "provider": "anthropic",
+        "model_id": "claude-sonnet-4-5"
+      },
+      "state": "running"
     }
   }
 }
