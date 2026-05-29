@@ -1,4 +1,8 @@
-# Fabro execution image for x-matrix.
+# Legacy Fabro execution image for x-matrix.
+#
+# The active workflow now uses the devenv.nix containers."fabro-dev" image:
+# ghcr.io/mattwynne/x-matrix-fabro-dev:latest. This Dockerfile is retained as
+# reference only.
 #
 # Build once on the machine that runs Fabro's Docker sandboxes:
 #

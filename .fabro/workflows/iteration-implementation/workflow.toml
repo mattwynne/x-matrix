@@ -5,6 +5,7 @@ graph = "workflow.fabro"
 
 [run]
 goal = "Implement a validated iteration plan and leave the codebase passing dev check"
+working_dir = "/workspace"
 
 [run.environment]
 id = "x-matrix-dev"
@@ -13,14 +14,31 @@ id = "x-matrix-dev"
 provider = "docker"
 
 [environments.x-matrix-dev.image]
-ref = "x-matrix-fabro-dev:latest"
-
+ref = "ghcr.io/mattwynne/x-matrix-fabro-dev:latest"
 [environments.x-matrix-dev.resources]
 cpu = 4
 memory = "8GB"
 
 [run.inputs]
 plan_path = "docs/iterations/NNN-topic/plan.md"
+
+[run.clone]
+enabled = false
+
+[[run.prepare.steps]]
+command = ["mkdir", "-p", "/workspace"]
+
+[[run.prepare.steps]]
+command = ["git", "clone", "--branch", "main", "--single-branch", "--depth", "10", "--no-tags", "https://github.com/mattwynne/x-matrix", "/workspace"]
+
+[[run.prepare.steps]]
+command = ["git", "-C", "/workspace", "config", "user.email", "fabro@example.invalid"]
+
+[[run.prepare.steps]]
+command = ["git", "-C", "/workspace", "config", "user.name", "Fabro"]
+
+[[run.prepare.steps]]
+command = ["bash", "/workspace/.fabro/workflows/iteration-implementation/prepare_mix.sh"]
 
 [run.pull_request]
 enabled = true

@@ -34,6 +34,22 @@ digraph IterationImplementation {
         script="echo 'Iteration implementation failed: the plan file could not be read. Pass -I plan_path=docs/iterations/NNN-topic/plan.md and ensure it is committed/pushed for remote sandboxes.' >&2\nexit 1"
     ]
 
+
+
+    preflight_sandbox [
+        label="Preflight Sandbox Toolchain",
+        shape=parallelogram,
+        script="set -eu\nfail=0\nreport_env() {\n  label=\"$1\"\n  echo \"== $label ==\"\n  for name in HOME MIX_HOME HEX_HOME XDG_CACHE_HOME DEVENV_ROOT DEVENV_STATE DEVENV_PROFILE DEVENV_DOTFILE PGHOST PGPORT PGDATA; do\n    eval \"value=\\${$name-}\"\n    printf '%s=%s\\n' \"$name\" \"$value\"\n  done\n}\nmissing=0\nrequire() {\n  if ! command -v \"$1\" >/dev/null 2>&1; then\n    echo \"Missing required sandbox tool: $1\" >&2\n    missing=1\n  fi\n}\nreport_env \"bare container\"\nrequire devenv\nrequire git\nrequire argc\nrequire elixir\nrequire mix\nrequire node\nrequire npm\nrequire pg_isready\nif [ ! -x bin/dev ]; then\n  echo \"Missing or non-executable bin/dev\" >&2\n  missing=1\nfi\nif [ \"$missing\" -ne 0 ]; then\n  echo \"Sandbox toolchain preflight failed before implementation. Fix the Fabro environment/image rather than patching application code.\" >&2\n  exit 1\nfi\ndevenv shell -- bash -lc '\n  set -eu\n  echo \"== inside devenv shell ==\"\n  for name in HOME MIX_HOME HEX_HOME XDG_CACHE_HOME DEVENV_ROOT DEVENV_STATE DEVENV_PROFILE DEVENV_DOTFILE PGHOST PGPORT PGDATA; do\n    eval \"value=\\${$name-}\"\n    printf \"%s=%s\\n\" \"$name\" \"$value\"\n  done\n  for name in HOME MIX_HOME HEX_HOME XDG_CACHE_HOME; do\n    eval \"dir=\\${$name-}\"\n    case \"$dir\" in /env|/env/*) echo \"stale /env path: $name=$dir\" >&2; exit 1;; esac\n    mkdir -p \"$dir\"\n    test -w \"$dir\"\n    probe=\"$dir/.fabro-write-probe-$$\"\n    : > \"$probe\"\n    rm -f \"$probe\"\n  done\n'\nPATH=\"$PWD/bin:$PATH\" dev --help >/dev/null\ntrap 'PATH=\"$PWD/bin:$PATH\" dev down >/dev/null 2>&1 || true' EXIT\nPATH=\"$PWD/bin:$PATH\" dev up >/dev/null\necho \"Starting native-dependency smoke test...\"\ndevenv shell -- bash -lc 'MIX_ENV=test mix deps.compile lazy_html --force' || {\n  echo \"Native dependency smoke test failed. This may indicate cache/build-tool issues in the sandbox environment.\" >&2\n  fail=1\n}\nif [ \"$fail\" -ne 0 ]; then\n  echo 'Sandbox runtime preflight failed before implementation. Fix the Fabro image/workflow/runtime environment rather than patching application code.' >&2\n  exit 1\nfi\necho \"Sandbox toolchain preflight passed.\"",
+        timeout="600s"
+    ]
+
+    preflight_failed [
+        label="Fail: Sandbox Preflight",
+        shape=parallelogram,
+        goal_gate=true,
+        script="echo 'Iteration implementation failed before coding: the sandbox/toolchain preflight did not pass. Fix the Fabro environment or image, then retry.' >&2\nexit 1"
+    ]
+
     implement [
         label="Implement Iteration",
         prompt="@prompts/implement.md",
@@ -106,9 +122,13 @@ digraph IterationImplementation {
     ]
 
     start -> read_plan
-    read_plan -> implement [condition="outcome=succeeded"]
+    read_plan -> preflight_sandbox [condition="outcome=succeeded"]
     read_plan -> read_failed
     read_failed -> exit
+
+    preflight_sandbox -> implement [condition="outcome=succeeded"]
+    preflight_sandbox -> preflight_failed
+    preflight_failed -> exit
 
     implement -> dev_check
     dev_check -> review_fork [label="Dev check passed", condition="outcome=succeeded"]

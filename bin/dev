@@ -3,12 +3,45 @@ set -euo pipefail
 
 # @describe XMatrix developer commands
 
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+if [ "${X_MATRIX_DEVENV_SHELL:-}" != "1" ]; then
+  exec env \
+    -u DEVENV_DOTFILE \
+    -u DEVENV_PROFILE \
+    -u DEVENV_ROOT \
+    -u DEVENV_STATE \
+    -u DEVENV_TASKS \
+    -u DEVENV_TASK_FILE \
+    -u PGDATA \
+    -u PGHOST \
+    -u PGPORT \
+    X_MATRIX_DEVENV_SHELL=1 \
+    devenv shell -- "$0" "$@"
+fi
+
+if ! command -v argc >/dev/null 2>&1; then
+  echo "Missing required tool: argc. devenv shell did not provide the expected environment." >&2
+  exit 1
+fi
+
 ensure_postgres() {
-  if ! devenv processes status postgres >/dev/null 2>&1; then
-    devenv up -d --strict-ports postgres
+  if pg_isready -h "$PGHOST" -p "$PGPORT" >/dev/null 2>&1; then
+    return
   fi
 
-  devenv processes wait
+  # Reset stale process-compose state before starting. A previous run can leave
+  # devenv thinking postgres is ready even when the current shell's socket/port
+  # is not accepting connections.
+  devenv processes down >/dev/null 2>&1 || true
+  DEVENV_TUI=false devenv processes up --strict-ports -d postgres
+  devenv processes wait --timeout 120
+
+  if ! pg_isready -h "$PGHOST" -p "$PGPORT" >/dev/null 2>&1; then
+    devenv processes logs -n 100 postgres >&2 || true
+    echo "Postgres did not become ready at PGHOST=$PGHOST PGPORT=$PGPORT" >&2
+    exit 1
+  fi
 }
 
 # @cmd Install dependencies, create/migrate/seed the database, and build assets.
@@ -17,9 +50,14 @@ setup() {
   mix setup
 }
 
-# @cmd Start Postgres and the Phoenix server with devenv/process-compose.
+# @cmd Start Postgres.
 up() {
-  devenv up --strict-ports
+  ensure_postgres
+}
+
+# @cmd Stop development services.
+down() {
+  devenv processes down || true
 }
 
 # @cmd Run the Phoenix server only. Assumes Postgres is already running.
@@ -30,7 +68,8 @@ server() {
 # @cmd Run the project quality gate in test mode.
 check() {
   ensure_postgres
-  MIX_ENV=test mix check
+  trap down EXIT
+  (cd "$repo_root" && mix precommit)
 }
 
 # @cmd Run tests.
