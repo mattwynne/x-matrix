@@ -1,0 +1,5 @@
+{
+  "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+  "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+  "language": "shell"
+}

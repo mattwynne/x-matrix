@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T02:26:05.359704938Z",
-  "last_event_at": "2026-05-29T02:28:41.519412936Z",
+  "last_event_at": "2026-05-29T02:28:47.222082676Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -1130,9 +1130,9 @@
       }
     },
     {
-      "seq": 0,
+      "seq": 88,
       "checkpoint": {
-        "timestamp": "2026-05-29T02:28:41.536196129Z",
+        "timestamp": "2026-05-29T02:28:45.052249146Z",
         "current_node": "synthesis_gate",
         "completed_nodes": [
           "start",
@@ -1144,8 +1144,12 @@
         ],
         "node_retries": {},
         "context_values": {
+          "internal.retry_count.start": 0,
           "internal.fidelity": "summary:high",
-          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete impleme",
+          "internal.node_visit_count": 1,
+          "graph.rankdir": "LR",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "parallel.branch_count": 3,
           "parallel.results": [
             {
               "id": "gemini_review",
@@ -1163,44 +1167,50 @@
               "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
             }
           ],
-          "plan_ready": true,
-          "failure_signature": "",
-          "internal.retry_count.fork": 0,
-          "thread.read_plan.current_node": "fork",
-          "internal.retry_count.merge": 0,
-          "failure_class": "",
-          "graph.goal": "Validate that an iteration plan is ready for implementation",
-          "plan_needs_fix": false,
-          "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
-          "parallel.fan_in.best_id": "claude_review",
-          "graph.default_fidelity": "summary:high",
-          "graph.rankdir": "LR",
-          "last_stage": "synthesize",
-          "internal.retry_count.synthesis_gate": 0,
-          "parallel.branch_count": 3,
           "internal.thread_id": "synthesize",
-          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
-          "internal.work_dir": "/workspace/x-matrix",
-          "outcome": "succeeded",
-          "parallel.fan_in.best_outcome": "succeeded",
-          "thread.synthesize.current_node": "synthesis_gate",
-          "current_node": "synthesis_gate",
-          "thread.fork.current_node": "merge",
-          "internal.retry_count.synthesize": 0,
-          "plan_needs_human": false,
-          "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
-          "internal.retry_count.read_plan": 0,
+          "internal.retry_count.merge": 0,
           "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b",
-          "internal.retry_count.start": 0,
-          "thread.start.current_node": "read_plan",
-          "internal.node_visit_count": 1,
+          "last_stage": "synthesize",
+          "internal.retry_count.synthesize": 0,
+          "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e",
+          "internal.work_dir": "/workspace/x-matrix",
+          "thread.read_plan.current_node": "fork",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
+          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
+          "failure_signature": "",
           "thread.merge.current_node": "synthesize",
-          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        "
+          "plan_needs_fix": false,
+          "parallel.fan_in.best_outcome": "succeeded",
+          "internal.retry_count.synthesis_gate": 0,
+          "thread.start.current_node": "read_plan",
+          "thread.fork.current_node": "merge",
+          "outcome": "succeeded",
+          "current_node": "synthesis_gate",
+          "internal.retry_count.fork": 0,
+          "parallel.fan_in.best_id": "claude_review",
+          "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
+          "plan_ready": true,
+          "failure_class": "",
+          "thread.synthesize.current_node": "synthesis_gate",
+          "internal.retry_count.read_plan": 0,
+          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete impleme",
+          "plan_needs_human": false,
+          "graph.default_fidelity": "summary:high"
         },
         "node_outcomes": {
-          "start": {
+          "read_plan": {
             "status": "succeeded",
-            "usage": null
+            "context_updates": {
+              "command.output": "blob://sha256/4120b7733c828973038353300bffe7f3a1c1f234501d9e837c0e83b2ba7d891e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/004-openrouter-llm-provider/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 256,
+              "active_time_ms": 256
+            }
           },
           "synthesis_gate": {
             "status": "succeeded",
@@ -1248,6 +1258,204 @@
               "active_time_ms": 20030
             }
           },
+          "merge": {
+            "status": "succeeded",
+            "context_updates": {
+              "parallel.fan_in.best_id": "claude_review",
+              "parallel.fan_in.best_outcome": "succeeded",
+              "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            "notes": "Selected best candidate: claude_review",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 0,
+              "active_time_ms": 0
+            }
+          },
+          "fork": {
+            "status": "succeeded",
+            "jump_to_node": "merge",
+            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
+            "usage": null
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          }
+        },
+        "next_node_id": "publish_ready",
+        "git_commit_sha": "98e88f75e6915174f6f9afb2bc673f7acd7563dd",
+        "node_visits": {
+          "synthesize": 1,
+          "fork": 1,
+          "synthesis_gate": 1,
+          "read_plan": 1,
+          "start": 1,
+          "merge": 1
+        }
+      },
+      "diff": {
+        "summary": {
+          "files_changed": 0,
+          "additions": 0,
+          "deletions": 0
+        }
+      }
+    },
+    {
+      "seq": 0,
+      "checkpoint": {
+        "timestamp": "2026-05-29T02:28:47.226857818Z",
+        "current_node": "publish_ready",
+        "completed_nodes": [
+          "start",
+          "read_plan",
+          "fork",
+          "merge",
+          "synthesize",
+          "synthesis_gate",
+          "publish_ready"
+        ],
+        "node_retries": {},
+        "context_values": {
+          "internal.fidelity": "summary:high",
+          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete impleme",
+          "parallel.results": [
+            {
+              "id": "gemini_review",
+              "status": "succeeded",
+              "head_sha": "8db641eb64648a7dcfc459ca89e3b12f13d5a17b"
+            },
+            {
+              "id": "claude_review",
+              "status": "succeeded",
+              "head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            {
+              "id": "codex_review",
+              "status": "succeeded",
+              "head_sha": "e9a7dc2e8bbf2ebf15b53781f6afa21a22ad68a8"
+            }
+          ],
+          "plan_ready": true,
+          "failure_signature": "",
+          "internal.retry_count.fork": 0,
+          "thread.read_plan.current_node": "fork",
+          "internal.retry_count.merge": 0,
+          "failure_class": "",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "plan_needs_fix": false,
+          "internal.retry_count.publish_ready": 0,
+          "internal.run_id": "01KSRRV2F1ZN70WMP91R84S2A8",
+          "parallel.fan_in.best_id": "claude_review",
+          "graph.default_fidelity": "summary:high",
+          "graph.rankdir": "LR",
+          "last_stage": "synthesize",
+          "internal.retry_count.synthesis_gate": 0,
+          "parallel.branch_count": 3,
+          "internal.thread_id": "synthesis_gate",
+          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
+          "internal.work_dir": "/workspace/x-matrix",
+          "outcome": "succeeded",
+          "parallel.fan_in.best_outcome": "succeeded",
+          "thread.synthesize.current_node": "synthesis_gate",
+          "current_node": "publish_ready",
+          "thread.fork.current_node": "merge",
+          "internal.retry_count.synthesize": 0,
+          "plan_needs_human": false,
+          "command.output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
+          "thread.synthesis_gate.current_node": "publish_ready",
+          "internal.retry_count.read_plan": 0,
+          "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b",
+          "internal.retry_count.start": 0,
+          "thread.start.current_node": "read_plan",
+          "internal.node_visit_count": 1,
+          "thread.merge.current_node": "synthesize",
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        "
+        },
+        "node_outcomes": {
+          "publish_ready": {
+            "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f"
+            },
+            "notes": "Script completed: .fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 2145,
+              "active_time_ms": 2145
+            }
+          },
+          "synthesize": {
+            "status": "succeeded",
+            "context_updates": {
+              "last_stage": "synthesize",
+              "plan_needs_human": false,
+              "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete impleme",
+              "plan_ready": true,
+              "plan_needs_fix": false,
+              "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is ready for implementation. All three reviewers found the plan to be well-structured with clear scope, concrete implementation steps, and testable acceptance criteria. The minor issues raised are either non-blocking, already addressed in the plan, or represent stylistic preferences rather than material gaps.\n\n## 2. Consensus Findings\n\n- **Clear scope and goal**: All three reviewers agree the plan has a well-defined, smallest-useful-slice scope — adding OpenRouter as an LLM provider with fallback to scripted guide.\n- **Concrete implementation steps**: The 8-step implementation sequence is detailed enough for an engineer to begin without ambiguity.\n- **Testable validation criteria**: The validation plan includes both automated tests (unit, adapter, LiveView) and manual verification steps.\n- **Technical decisions are resolved**: The spike already confirmed the API compatibility, default model (`openai/gpt-oss-120b:free`), and response format. No open technical decisions remain.\n- **Fallback behavior is well-specified**: The plan clearly defines behavior when no API key is present or when the provider returns an error.\n- **Existing tests must continue to pass**: The plan explicitly requires `mix precommit` to pass and existing interview tests to remain green.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about HTTP timeout configuration**: Downgraded from blocking to non-blocking. The plan specifies using Req (the project's standard HTTP client) and the implementation steps mention configurable timeout. This is a normal implementation detail, not a missing design decision.\n- **Claude's suggestion about explicit error-type enumeration**: Downgraded. The plan already states \"fallback on provider error\" and \"keep parsing defensive.\" Enumerating every possible HTTP error code is implementation detail, not a plan gap.\n- **Codex/GPT's suggestion about rate-limit handling specifics**: Downgraded. The plan already acknowledges rate limits under Risks and specifies fallback as the mitigation. The engineer has sufficient guidance.\n- **Gemini's concern about model configuration flexibility**: Not blocking. The plan specifies `OPENROUTER_MODEL` as an optional env var with a default. This is sufficient for this iteration; further configurability is explicitly deferred.\n- **Claude's note about acceptance criteria format**: The validation plan section already contains concrete, testable criteria. Reformatting them with numbered checkboxes would be editorial polish, not a material improvement.\n- **Multiple reviewers noting the Anthropic cleanup deferral**: All reviewers correctly identified this is explicitly scoped out and listed as a follow-up. Not blocking.\n\n## 4. Blocking Gaps\n\nNone. The plan provides sufficient detail for an engineer to implement without resolving any material product, business, or technical decisions.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nNot applicable — no edits are being made. The plan is ready for implementation as-is.\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}"
+            },
+            "notes": "Stage completed: synthesize",
+            "usage": {
+              "input": {
+                "usage": {
+                  "model": {
+                    "provider": "anthropic",
+                    "model_id": "claude-opus-4-6"
+                  },
+                  "tokens": {
+                    "input_tokens": 2034,
+                    "output_tokens": 726,
+                    "reasoning_tokens": 0,
+                    "cache_read_tokens": 0,
+                    "cache_write_tokens": 6443
+                  }
+                },
+                "facts": {
+                  "algorithm": "anthropic",
+                  "cache_write_5m_tokens": 6443,
+                  "cache_write_1h_tokens": 0
+                }
+              },
+              "total_usd_micros": 68588
+            },
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 20030,
+              "tool_time_ms": 0,
+              "active_time_ms": 20030
+            }
+          },
+          "merge": {
+            "status": "succeeded",
+            "context_updates": {
+              "parallel.fan_in.best_id": "claude_review",
+              "parallel.fan_in.best_outcome": "succeeded",
+              "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
+            },
+            "notes": "Selected best candidate: claude_review",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 0,
+              "active_time_ms": 0
+            }
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          },
+          "synthesis_gate": {
+            "status": "succeeded",
+            "notes": "Conditional node evaluated: synthesis_gate",
+            "usage": null
+          },
           "read_plan": {
             "status": "succeeded",
             "context_updates": {
@@ -1267,32 +1475,17 @@
             "jump_to_node": "merge",
             "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
             "usage": null
-          },
-          "merge": {
-            "status": "succeeded",
-            "context_updates": {
-              "parallel.fan_in.best_id": "claude_review",
-              "parallel.fan_in.best_outcome": "succeeded",
-              "parallel.fan_in.best_head_sha": "d0b59edf09c0e33ff5dec1be496149d04d34712b"
-            },
-            "notes": "Selected best candidate: claude_review",
-            "usage": null,
-            "timing": {
-              "wall_time_ms": 0,
-              "inference_time_ms": 0,
-              "tool_time_ms": 0,
-              "active_time_ms": 0
-            }
           }
         },
-        "next_node_id": "publish_ready",
+        "next_node_id": "exit",
         "node_visits": {
           "synthesize": 1,
           "start": 1,
           "read_plan": 1,
           "fork": 1,
           "merge": 1,
-          "synthesis_gate": 1
+          "synthesis_gate": 1,
+          "publish_ready": 1
         }
       },
       "diff": {}
@@ -1537,6 +1730,77 @@
         "cache_write_tokens": 0
       },
       "state": "succeeded"
+    },
+    "synthesis_gate@1": {
+      "first_event_seq": 83,
+      "prompt": null,
+      "response": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Conditional node evaluated: synthesis_gate",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T02:28:41.532670894Z"
+      },
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": null,
+      "script_timing": null,
+      "parallel_results": null,
+      "output": null,
+      "started_at": "2026-05-29T02:28:41.530605722Z",
+      "handler": "conditional",
+      "timing": {
+        "wall_time_ms": 1,
+        "inference_time_ms": 0,
+        "tool_time_ms": 0,
+        "active_time_ms": 0
+      },
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "succeeded"
+    },
+    "publish_ready@1": {
+      "first_event_seq": 91,
+      "prompt": null,
+      "response": null,
+      "completion": null,
+      "provider_used": null,
+      "diff": null,
+      "script_invocation": {
+        "script": ".fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+        "command": "exec 2>&1\n.fabro/workflows/plan-validation/scripts/publish_ready.sh 'docs/iterations/004-openrouter-llm-provider/plan.md'",
+        "language": "shell"
+      },
+      "script_timing": {
+        "output": "blob://sha256/165142608d5d1deabf38ea52ca094c15dbdcc2dd3aae74566b912c2e5b59e63f",
+        "exit_code": 0,
+        "duration_ms": 2145,
+        "termination": "exited",
+        "output_bytes": 354,
+        "live_streaming": true
+      },
+      "parallel_results": null,
+      "output": null,
+      "output_bytes": 354,
+      "live_streaming": true,
+      "termination": "exited",
+      "started_at": "2026-05-29T02:28:45.063453147Z",
+      "handler": "command",
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "state": "running"
     }
   }
 }
