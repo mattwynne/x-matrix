@@ -6,6 +6,6 @@
 | 002 | Structured interview without LLM | [plan](002-structured-interview/plan.md) | 2026-05-27 | implemented | None yet |
 | 003 | LLM-led conversational interview | [plan](003-llm-led-interview/plan.md) | 2026-05-27 | implemented | None yet |
 | 004 | OpenRouter LLM provider | [plan](004-openrouter-llm-provider/plan.md) | 2026-05-28 | implemented | None yet |
-| 005 | True North agreement flow | TBD | TBD | proposed | None yet |
+| 005 | True North agreement flow | [plan](005-true-north-agreement-flow/plan.md) | 2026-05-29 | draft | None yet |
 | 006 | Coherence and correlation assistance | TBD | TBD | proposed | None yet |
 | 007 | Tracking and review loop | TBD | TBD | proposed | None yet |
