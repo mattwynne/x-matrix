@@ -1,7 +1,7 @@
 # True North Agreement Flow
 
 Date: 2026-05-29
-Status: draft
+Status: ready
 
 ## Goal
 
