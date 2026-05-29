@@ -651,7 +651,7 @@
     "kind": "running"
   },
   "status_updated_at": "2026-05-29T07:08:27.573038488Z",
-  "last_event_at": "2026-05-29T07:10:09.009592666Z",
+  "last_event_at": "2026-05-29T07:10:33.985014573Z",
   "pending_control": null,
   "checkpoints": [
     {
@@ -964,9 +964,9 @@
       }
     },
     {
-      "seq": 0,
+      "seq": 80,
       "checkpoint": {
-        "timestamp": "2026-05-29T07:10:30.916584557Z",
+        "timestamp": "2026-05-29T07:10:33.985014573Z",
         "current_node": "synthesize",
         "completed_nodes": [
           "start",
@@ -977,13 +977,181 @@
         ],
         "node_retries": {},
         "context_values": {
+          "graph.rankdir": "LR",
+          "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issues raised are either non-blocking, already addressed in the plan, or are implementation details that don't require plan-level decisions.\n\n## 2. Consensus Findings\n\n- **Well-scoped**: All three reviewers agree the plan has a clear, bounded scope (True North agreement flow only) with explicit deferral of generalization to other TASTE sections.\n- **Concrete acceptance criteria**: The plan provides testable acceptance criteria, a validation plan with both automated and manual steps, and a demo script.\n- **Technical design is specified**: The `strategy_section_sessions` table with JSONB `state`, the `TrueNorthAgent` module, the tool-call interface, and the LiveView component structure are all defined with enough detail to implement.\n- **AI integration approach is sound**: Fake adapters for testing, structured tool calls for candidate generation, and graceful fallback for missing API keys are all addressed.\n- **State management is clear**: Session persistence, resume/restore behavior, and the separation of working state (JSONB) from submitted domain data (normalized `true_norths` table) are explicitly designed.\n- **Risk awareness is adequate**: The plan identifies key risks (JSONB as source of truth, model variance, candidate ID stability after resume) and provides mitigation approaches.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about missing error-handling specifics for AI provider failures**: Downgraded from blocking. The plan specifies a fallback path for no-key/provider-error scenarios, and the acceptance criteria include testing this path. Detailed error-handling UX (retry buttons, specific error messages) is an implementation detail, not a plan-level gap.\n\n- **Claude's note about acceptance criteria needing tightening**: Downgraded. The acceptance criteria in the plan are already concrete and testable (e.g., \"candidate cards render,\" \"accept/submit creates the single True North and advances to Aspirations,\" \"returning/resuming restores persisted session state\"). These are sufficient for an engineer to write tests against.\n\n- **Codex/GPT's suggestion to add explicit performance/latency criteria**: Rejected as not blocking. This is iteration 5 of an early-stage product. Performance benchmarks would be premature scope creep. The plan correctly focuses on functional correctness.\n\n- **Multiple reviewers noting the JSONB schema could be more precisely specified**: Downgraded. The plan states the `state` column holds agent working state (conversation history, candidates, selected candidate) and explicitly warns against making JSONB the source of truth for submitted data. The exact JSONB shape is an implementation detail that the engineer will define when building the agent module.\n\n- **Gemini's concern about missing migration rollback strategy**: Rejected. Standard Ecto migration practices apply; this doesn't need plan-level specification.\n\n## 4. Blocking Gaps\n\nNone identified. The plan provides sufficient detail for implementation across all dimensions: scope, data model, component architecture, AI integration, state management, testing strategy, and validation criteria.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nN/A — no repairs needed. The plan is ready for implementation as-is.\n\n---\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
+          "graph.goal": "Validate that an iteration plan is ready for implementation",
+          "thread.read_plan.current_node": "fork",
+          "thread.start.current_node": "read_plan",
+          "last_stage": "synthesize",
+          "internal.retry_count.fork": 0,
+          "command.output": "blob://sha256/e6dd9d2c73344f0ac291ae7bbc824e01664855f32420c9a836cec1a0cf40ef7e",
+          "current_node": "synthesize",
+          "parallel.results": [
+            {
+              "id": "gemini_review",
+              "status": "succeeded",
+              "head_sha": "6653d59ed8f98587aa0834108e5ac9297fb5c026"
+            },
+            {
+              "id": "claude_review",
+              "status": "succeeded",
+              "head_sha": "59fb59ddac3037eb8e9701435cb09299105b25c7"
+            },
+            {
+              "id": "codex_review",
+              "status": "succeeded",
+              "head_sha": "b38b7332f3cf6825fd28e5a35f90e6fac260d43b"
+            }
+          ],
+          "internal.retry_count.merge": 0,
+          "internal.retry_count.start": 0,
+          "plan_ready": true,
+          "failure_signature": "",
+          "internal.retry_count.synthesize": 0,
+          "internal.run_id": "01KSS9057WAZTY03MHHQR8D0PY",
+          "failure_class": "",
+          "internal.work_dir": "/workspace/x-matrix",
+          "graph.default_fidelity": "summary:high",
+          "outcome": "succeeded",
+          "plan_needs_human": false,
+          "thread.fork.current_node": "merge",
+          "internal.node_visit_count": 1,
+          "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issue",
+          "internal.retry_count.read_plan": 0,
+          "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
+          "internal.fidelity": "summary:high",
+          "parallel.fan_in.best_head_sha": "59fb59ddac3037eb8e9701435cb09299105b25c7",
+          "parallel.fan_in.best_id": "claude_review",
+          "parallel.fan_in.best_outcome": "succeeded",
+          "plan_needs_fix": false,
+          "internal.thread_id": "merge",
+          "thread.merge.current_node": "synthesize",
+          "parallel.branch_count": 3
+        },
+        "node_outcomes": {
+          "merge": {
+            "status": "succeeded",
+            "context_updates": {
+              "parallel.fan_in.best_head_sha": "59fb59ddac3037eb8e9701435cb09299105b25c7",
+              "parallel.fan_in.best_id": "claude_review",
+              "parallel.fan_in.best_outcome": "succeeded"
+            },
+            "notes": "Selected best candidate: claude_review",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 0,
+              "active_time_ms": 0
+            }
+          },
+          "read_plan": {
+            "status": "succeeded",
+            "context_updates": {
+              "command.output": "blob://sha256/e6dd9d2c73344f0ac291ae7bbc824e01664855f32420c9a836cec1a0cf40ef7e"
+            },
+            "notes": "Script completed: PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+            "usage": null,
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 0,
+              "tool_time_ms": 154,
+              "active_time_ms": 154
+            }
+          },
+          "start": {
+            "status": "succeeded",
+            "usage": null
+          },
+          "fork": {
+            "status": "succeeded",
+            "jump_to_node": "merge",
+            "notes": "Parallel node dispatched 3 branches (3 succeeded, 0 failed)",
+            "usage": null
+          },
+          "synthesize": {
+            "status": "succeeded",
+            "context_updates": {
+              "last_stage": "synthesize",
+              "plan_ready": true,
+              "plan_needs_fix": false,
+              "plan_needs_human": false,
+              "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issue",
+              "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issues raised are either non-blocking, already addressed in the plan, or are implementation details that don't require plan-level decisions.\n\n## 2. Consensus Findings\n\n- **Well-scoped**: All three reviewers agree the plan has a clear, bounded scope (True North agreement flow only) with explicit deferral of generalization to other TASTE sections.\n- **Concrete acceptance criteria**: The plan provides testable acceptance criteria, a validation plan with both automated and manual steps, and a demo script.\n- **Technical design is specified**: The `strategy_section_sessions` table with JSONB `state`, the `TrueNorthAgent` module, the tool-call interface, and the LiveView component structure are all defined with enough detail to implement.\n- **AI integration approach is sound**: Fake adapters for testing, structured tool calls for candidate generation, and graceful fallback for missing API keys are all addressed.\n- **State management is clear**: Session persistence, resume/restore behavior, and the separation of working state (JSONB) from submitted domain data (normalized `true_norths` table) are explicitly designed.\n- **Risk awareness is adequate**: The plan identifies key risks (JSONB as source of truth, model variance, candidate ID stability after resume) and provides mitigation approaches.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about missing error-handling specifics for AI provider failures**: Downgraded from blocking. The plan specifies a fallback path for no-key/provider-error scenarios, and the acceptance criteria include testing this path. Detailed error-handling UX (retry buttons, specific error messages) is an implementation detail, not a plan-level gap.\n\n- **Claude's note about acceptance criteria needing tightening**: Downgraded. The acceptance criteria in the plan are already concrete and testable (e.g., \"candidate cards render,\" \"accept/submit creates the single True North and advances to Aspirations,\" \"returning/resuming restores persisted session state\"). These are sufficient for an engineer to write tests against.\n\n- **Codex/GPT's suggestion to add explicit performance/latency criteria**: Rejected as not blocking. This is iteration 5 of an early-stage product. Performance benchmarks would be premature scope creep. The plan correctly focuses on functional correctness.\n\n- **Multiple reviewers noting the JSONB schema could be more precisely specified**: Downgraded. The plan states the `state` column holds agent working state (conversation history, candidates, selected candidate) and explicitly warns against making JSONB the source of truth for submitted data. The exact JSONB shape is an implementation detail that the engineer will define when building the agent module.\n\n- **Gemini's concern about missing migration rollback strategy**: Rejected. Standard Ecto migration practices apply; this doesn't need plan-level specification.\n\n## 4. Blocking Gaps\n\nNone identified. The plan provides sufficient detail for implementation across all dimensions: scope, data model, component architecture, AI integration, state management, testing strategy, and validation criteria.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nN/A — no repairs needed. The plan is ready for implementation as-is.\n\n---\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}"
+            },
+            "notes": "Stage completed: synthesize",
+            "usage": {
+              "input": {
+                "usage": {
+                  "model": {
+                    "provider": "anthropic",
+                    "model_id": "claude-opus-4-6"
+                  },
+                  "tokens": {
+                    "input_tokens": 2006,
+                    "output_tokens": 808,
+                    "reasoning_tokens": 0,
+                    "cache_read_tokens": 0,
+                    "cache_write_tokens": 6443
+                  }
+                },
+                "facts": {
+                  "algorithm": "anthropic",
+                  "cache_write_5m_tokens": 6443,
+                  "cache_write_1h_tokens": 0
+                }
+              },
+              "total_usd_micros": 70498
+            },
+            "timing": {
+              "wall_time_ms": 0,
+              "inference_time_ms": 21867,
+              "tool_time_ms": 0,
+              "active_time_ms": 21867
+            }
+          }
+        },
+        "next_node_id": "synthesis_gate",
+        "git_commit_sha": "000ea63b618c98dce937b8700aac6277e62d94f6",
+        "node_visits": {
+          "synthesize": 1,
+          "start": 1,
+          "read_plan": 1,
+          "fork": 1,
+          "merge": 1
+        }
+      },
+      "diff": {
+        "summary": {
+          "files_changed": 0,
+          "additions": 0,
+          "deletions": 0
+        }
+      }
+    },
+    {
+      "seq": 0,
+      "checkpoint": {
+        "timestamp": "2026-05-29T07:10:33.992730021Z",
+        "current_node": "synthesis_gate",
+        "completed_nodes": [
+          "start",
+          "read_plan",
+          "fork",
+          "merge",
+          "synthesize",
+          "synthesis_gate"
+        ],
+        "node_retries": {},
+        "context_values": {
           "graph.default_fidelity": "summary:high",
           "last_stage": "synthesize",
+          "thread.synthesize.current_node": "synthesis_gate",
           "internal.node_visit_count": 1,
           "thread.read_plan.current_node": "fork",
           "failure_signature": "",
           "internal.work_dir": "/workspace/x-matrix",
-          "current_node": "synthesize",
+          "current_node": "synthesis_gate",
           "command.output": "blob://sha256/e6dd9d2c73344f0ac291ae7bbc824e01664855f32420c9a836cec1a0cf40ef7e",
           "last_response": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issue",
           "graph.rankdir": "LR",
@@ -1016,13 +1184,14 @@
           "internal.fidelity": "summary:high",
           "internal.retry_count.start": 0,
           "parallel.branch_count": 3,
+          "internal.retry_count.synthesis_gate": 0,
           "response.synthesize": "# Plan Validation Synthesis Report\n\n## 1. Provisional Decision: READY\n\nThe plan is implementation-ready. All three reviewers agree the plan is comprehensive, well-structured, and actionable. The issues raised are either non-blocking, already addressed in the plan, or are implementation details that don't require plan-level decisions.\n\n## 2. Consensus Findings\n\n- **Well-scoped**: All three reviewers agree the plan has a clear, bounded scope (True North agreement flow only) with explicit deferral of generalization to other TASTE sections.\n- **Concrete acceptance criteria**: The plan provides testable acceptance criteria, a validation plan with both automated and manual steps, and a demo script.\n- **Technical design is specified**: The `strategy_section_sessions` table with JSONB `state`, the `TrueNorthAgent` module, the tool-call interface, and the LiveView component structure are all defined with enough detail to implement.\n- **AI integration approach is sound**: Fake adapters for testing, structured tool calls for candidate generation, and graceful fallback for missing API keys are all addressed.\n- **State management is clear**: Session persistence, resume/restore behavior, and the separation of working state (JSONB) from submitted domain data (normalized `true_norths` table) are explicitly designed.\n- **Risk awareness is adequate**: The plan identifies key risks (JSONB as source of truth, model variance, candidate ID stability after resume) and provides mitigation approaches.\n\n## 3. Corrected Findings\n\n- **Gemini's concern about missing error-handling specifics for AI provider failures**: Downgraded from blocking. The plan specifies a fallback path for no-key/provider-error scenarios, and the acceptance criteria include testing this path. Detailed error-handling UX (retry buttons, specific error messages) is an implementation detail, not a plan-level gap.\n\n- **Claude's note about acceptance criteria needing tightening**: Downgraded. The acceptance criteria in the plan are already concrete and testable (e.g., \"candidate cards render,\" \"accept/submit creates the single True North and advances to Aspirations,\" \"returning/resuming restores persisted session state\"). These are sufficient for an engineer to write tests against.\n\n- **Codex/GPT's suggestion to add explicit performance/latency criteria**: Rejected as not blocking. This is iteration 5 of an early-stage product. Performance benchmarks would be premature scope creep. The plan correctly focuses on functional correctness.\n\n- **Multiple reviewers noting the JSONB schema could be more precisely specified**: Downgraded. The plan states the `state` column holds agent working state (conversation history, candidates, selected candidate) and explicitly warns against making JSONB the source of truth for submitted data. The exact JSONB shape is an implementation detail that the engineer will define when building the agent module.\n\n- **Gemini's concern about missing migration rollback strategy**: Rejected. Standard Ecto migration practices apply; this doesn't need plan-level specification.\n\n## 4. Blocking Gaps\n\nNone identified. The plan provides sufficient detail for implementation across all dimensions: scope, data model, component architecture, AI integration, state management, testing strategy, and validation criteria.\n\n## 5. Codex Repair Brief\n\nNone.\n\n## 6. Questions for Matt\n\nNone.\n\n## 7. Validation Checklist\n\nN/A — no repairs needed. The plan is ready for implementation as-is.\n\n---\n\n{\"context_updates\":{\"plan_ready\":true,\"plan_needs_fix\":false,\"plan_needs_human\":false}}",
           "parallel.fan_in.best_outcome": "succeeded",
           "thread.start.current_node": "read_plan",
           "internal.retry_count.read_plan": 0,
           "internal.retry_count.synthesize": 0,
           "graph.model_stylesheet": "\n            * { reasoning_effort: high; }\n            #read_plan { reasoning_effort: low; }\n            #gemini_review { model: gemini-3.1-pro-preview; reasoning_effort: high; }\n            #claude_review { model: claude-sonnet-4-5; reasoning_effort: high; }\n            #codex_review { model: gpt-5.3-codex; reasoning_effort: high; }\n            #synthesize { model: claude-opus-4-6; reasoning_effort: high; }\n            #codex_update { model: gpt-5.3-codex; reasoning_effort: high; }\n            #read_updated_plan { reasoning_effort: low; }\n            #opus_recheck { model: claude-opus-4-6; reasoning_effort: high; }\n            #publish_ready { reasoning_effort: low; }\n        ",
-          "internal.thread_id": "merge",
+          "internal.thread_id": "synthesize",
           "internal.retry_count.fork": 0,
           "parallel.fan_in.best_id": "claude_review",
           "internal.run_id": "01KSS9057WAZTY03MHHQR8D0PY",
@@ -1084,6 +1253,11 @@
               "active_time_ms": 21867
             }
           },
+          "synthesis_gate": {
+            "status": "succeeded",
+            "notes": "Conditional node evaluated: synthesis_gate",
+            "usage": null
+          },
           "merge": {
             "status": "succeeded",
             "context_updates": {
@@ -1111,12 +1285,13 @@
             "usage": null
           }
         },
-        "next_node_id": "synthesis_gate",
+        "next_node_id": "publish_ready",
         "node_visits": {
           "merge": 1,
           "read_plan": 1,
           "fork": 1,
           "synthesize": 1,
+          "synthesis_gate": 1,
           "start": 1
         }
       },
@@ -1147,7 +1322,12 @@
       "first_event_seq": 73,
       "prompt": null,
       "response": null,
-      "completion": null,
+      "completion": {
+        "outcome": "succeeded",
+        "notes": "Stage completed: synthesize",
+        "failure_reason": null,
+        "timestamp": "2026-05-29T07:10:30.914789422Z"
+      },
       "provider_used": {
         "mode": "prompt",
         "provider": "anthropic",
@@ -1161,15 +1341,26 @@
       "output": null,
       "started_at": "2026-05-29T07:10:09.002472828Z",
       "handler": "prompt",
+      "timing": {
+        "wall_time_ms": 21912,
+        "inference_time_ms": 21867,
+        "tool_time_ms": 0,
+        "active_time_ms": 21867
+      },
       "usage": {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "total_tokens": 0,
+        "input_tokens": 2006,
+        "output_tokens": 808,
+        "total_tokens": 9257,
         "reasoning_tokens": 0,
         "cache_read_tokens": 0,
-        "cache_write_tokens": 0
+        "cache_write_tokens": 6443,
+        "total_usd_micros": 70498
       },
-      "state": "running"
+      "model": {
+        "provider": "anthropic",
+        "model_id": "claude-opus-4-6"
+      },
+      "state": "succeeded"
     },
     "start@1": {
       "first_event_seq": 17,
