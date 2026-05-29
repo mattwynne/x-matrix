@@ -1,0 +1,6 @@
+{
+  "outcome": "succeeded",
+  "notes": "Script completed: PLAN_PATH='docs/iterations/005-true-north-agreement-flow/plan.md'\nif [ ! -f \"$PLAN_PATH\" ]; then\n  echo \"Plan file not found: $PLAN_PATH\" >&2\n  exit 1\nfi\nprintf 'PLAN_PATH=%s\\n\\n' \"$PLAN_PATH\"\nsed -n '1,260p' \"$PLAN_PATH\"",
+  "failure_reason": null,
+  "timestamp": "2026-05-29T07:08:29.424395692Z"
+}
