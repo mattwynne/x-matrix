@@ -6,7 +6,14 @@ defmodule XMatrix.Strategies do
   import Ecto.Query
 
   alias XMatrix.Repo
-  alias XMatrix.Strategies.{Strategy, StrategyCorrelation, StrategyElement, StrategyMessage}
+
+  alias XMatrix.Strategies.{
+    Strategy,
+    StrategyCorrelation,
+    StrategyElement,
+    StrategyMessage,
+    StrategySectionSession
+  }
 
   @doc "Load any strategy with elements (ordered) and correlations preloaded."
   def get_strategy!(id) do
@@ -74,6 +81,72 @@ defmodule XMatrix.Strategies do
     |> order_by([s], desc: s.updated_at, desc: s.id)
     |> limit(1)
     |> Repo.one()
+  end
+
+  def get_section_session(%Strategy{} = strategy, section) when section in [:true_north] do
+    StrategySectionSession
+    |> Repo.get_by(strategy_id: strategy.id, section: section)
+    |> case do
+      nil -> create_section_session(strategy, section)
+      session -> session
+    end
+  end
+
+  def update_section_session(%Strategy{} = strategy, section, state)
+      when section in [:true_north] do
+    with :ok <- ensure_draft(strategy) do
+      strategy
+      |> get_section_session(section)
+      |> StrategySectionSession.changeset(%{state: normalize_session_state(state)})
+      |> Repo.update()
+    end
+  end
+
+  def update_section_session(%StrategySectionSession{} = session, state) do
+    with :ok <- ensure_draft(session) do
+      session
+      |> StrategySectionSession.changeset(%{state: normalize_session_state(state)})
+      |> Repo.update()
+    end
+  end
+
+  def submit_true_north(%Strategy{} = strategy, attrs) do
+    with :ok <- ensure_draft(strategy) do
+      title =
+        attrs |> Map.get(:title, Map.get(attrs, "title", "")) |> to_string() |> String.trim()
+
+      description =
+        attrs
+        |> Map.get(:description, Map.get(attrs, "description", ""))
+        |> to_string()
+        |> String.trim()
+
+      existing =
+        StrategyElement
+        |> where([e], e.strategy_id == ^strategy.id and e.element_type == :true_north)
+        |> order_by([e], asc: e.position, asc: e.id)
+        |> limit(1)
+        |> Repo.one()
+
+      result =
+        case existing do
+          nil ->
+            add_element(strategy, %{
+              element_type: :true_north,
+              title: title,
+              description: description
+            })
+
+          element ->
+            update_element(element, %{title: title, description: description})
+        end
+
+      with {:ok, element} <- result,
+           {:ok, session} <- mark_true_north_submitted(strategy, title, description),
+           {:ok, updated_strategy} <- set_step(strategy, "true_north_agreed") do
+        {:ok, %{element: element, session: session, strategy: updated_strategy}}
+      end
+    end
   end
 
   def add_element(%Strategy{} = strategy, attrs) do
@@ -164,5 +237,57 @@ defmodule XMatrix.Strategies do
     element.strategy_id
     |> get_strategy!()
     |> ensure_draft()
+  end
+
+  defp ensure_draft(%StrategySectionSession{} = session) do
+    session.strategy_id
+    |> get_strategy!()
+    |> ensure_draft()
+  end
+
+  defp create_section_session(%Strategy{} = strategy, section) do
+    %StrategySectionSession{}
+    |> StrategySectionSession.changeset(%{
+      strategy_id: strategy.id,
+      section: section,
+      state: default_section_state(section)
+    })
+    |> Repo.insert!()
+  end
+
+  defp default_section_state(:true_north) do
+    %{
+      "messages" => [],
+      "candidates" => [],
+      "status" => "in_progress"
+    }
+  end
+
+  defp normalize_session_state(state) when is_map(state) do
+    state
+    |> stringify_keys()
+    |> Map.put_new("messages", [])
+    |> Map.put_new("candidates", [])
+    |> Map.put_new("status", "in_progress")
+  end
+
+  defp stringify_keys(map) when is_map(map) do
+    Map.new(map, fn {key, value} -> {to_string(key), stringify_value(value)} end)
+  end
+
+  defp stringify_value(value) when is_map(value), do: stringify_keys(value)
+  defp stringify_value(value) when is_list(value), do: Enum.map(value, &stringify_value/1)
+  defp stringify_value(value), do: value
+
+  defp mark_true_north_submitted(strategy, title, description) do
+    session = get_section_session(strategy, :true_north)
+
+    state =
+      session.state
+      |> normalize_session_state()
+      |> Map.put("status", "submitted")
+      |> Map.put("submitted", %{"title" => title, "description" => description})
+
+    update_section_session(session, state)
   end
 end

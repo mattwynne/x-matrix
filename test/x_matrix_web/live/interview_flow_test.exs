@@ -7,9 +7,15 @@ defmodule XMatrixWeb.InterviewFlowTest do
     session =
       conn
       |> visit("/interview")
-      |> fill_in("Your answer", with: "Everyone has a safe home")
+      |> fill_in("Your answer or feedback", with: "Everyone has a safe home")
       |> click_button("Send")
-      |> click_button("Move on")
+      |> click_button(
+        "#true-north-candidates article:first-of-type button",
+        "Submit this True North"
+      )
+      |> assert_has("#true-north-agreed", text: "Everyone has a safe home")
+      |> click_button("Continue to Aspirations")
+      |> assert_has("#true-north-inline-confirmation", text: "Everyone has a safe home")
       |> fill_in("Your answer", with: "Reduce rough sleeping")
       |> click_button("Send")
       |> click_button("Move on")
@@ -43,6 +49,7 @@ defmodule XMatrixWeb.InterviewFlowTest do
     |> assert_has("h1", text: "You've built your X-Matrix")
     |> click_button("Finish & view matrix")
     |> assert_has("h2", text: "True North")
+    |> assert_has("span", text: "Everyone has a safe home")
     |> assert_has("span", text: "Reduce rough sleeping")
     |> assert_has("span", text: "Prevention even over relief")
     |> assert_has("span", text: "Days from referral to housing")

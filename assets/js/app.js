@@ -26,10 +26,39 @@ import {hooks as colocatedHooks} from "phoenix-colocated/x_matrix"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+const ChatComposer = {
+  mounted() {
+    this.textarea = this.el.querySelector("textarea")
+    this.scrollTranscript()
+
+    this.el.addEventListener("keydown", event => {
+      if(event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault()
+        this.el.requestSubmit()
+      }
+    })
+
+    this.el.addEventListener("submit", () => {
+      window.setTimeout(() => {
+        if(this.textarea) this.textarea.value = ""
+        this.scrollTranscript()
+      }, 0)
+    })
+  },
+  updated() {
+    if(this.textarea) this.textarea.value = ""
+    this.scrollTranscript()
+  },
+  scrollTranscript() {
+    const transcript = document.getElementById("interview-transcript")
+    if(transcript) transcript.scrollTop = transcript.scrollHeight
+  }
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, ChatComposer},
 })
 
 // Show progress bar on live navigation and form submits

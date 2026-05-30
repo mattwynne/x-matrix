@@ -3,12 +3,20 @@ defmodule XMatrixWeb.InterviewLiveTest do
 
   alias XMatrix.Strategies
 
-  test "starting an interview creates a draft and opens the chat shell", %{conn: conn} do
+  test "starting an interview creates a draft and opens the true north agreement UI", %{
+    conn: conn
+  } do
     conn
     |> visit("/interview")
-    |> assert_has("h1", text: "Conversational interview")
+    |> assert_has("h1", text: "True North agreement")
+    |> assert_has("div",
+      text: "Nothing is saved to the matrix until you explicitly submit a candidate"
+    )
+    |> assert_has("#true-north-agreement")
     |> assert_has("#interview-transcript")
     |> assert_has("#chat-form")
+    |> assert_has("#chat-thinking-indicator", text: "Facilitator is thinking")
+    |> assert_has("#chat-send-button[phx-disable-with='Thinking…']")
     |> assert_has("#emerging-matrix")
     |> assert_has("#taste-progress")
     |> assert_has("#ai-toggle")
@@ -40,7 +48,7 @@ defmodule XMatrixWeb.InterviewLiveTest do
            ]
   end
 
-  test "AI mode treats free text as chat until Add my answer", %{conn: conn} do
+  test "AI mode treats free text as chat until saving the answer", %{conn: conn} do
     previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
     Application.put_env(:x_matrix, :openrouter_api_key, "test-key")
 
@@ -63,7 +71,7 @@ defmodule XMatrixWeb.InterviewLiveTest do
     assert Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration) == []
 
     session
-    |> click_button("Add my answer")
+    |> click_button("Save my answer to matrix")
     |> assert_has("#emerging-matrix", text: "Reduce rough sleeping")
 
     [aspiration] = Strategies.elements_by_type(Strategies.get_strategy!(strategy.id), :aspiration)
@@ -86,7 +94,9 @@ defmodule XMatrixWeb.InterviewLiveTest do
     assert Strategies.get_strategy!(strategy.id).ai_assisted == true
   end
 
-  test "AI on without a key shows fallback notice and behaves like manual entry", %{conn: conn} do
+  test "AI on without a key shows fallback notice and requires explicit true north submission", %{
+    conn: conn
+  } do
     previous_key = Application.get_env(:x_matrix, :openrouter_api_key)
     Application.put_env(:x_matrix, :openrouter_api_key, nil)
 
@@ -102,8 +112,18 @@ defmodule XMatrixWeb.InterviewLiveTest do
     conn
     |> visit("/interview/#{strategy.id}")
     |> assert_has("div", text: "No OpenRouter API key is configured")
-    |> fill_in("Your answer", with: "Everyone has a home")
+    |> fill_in("Your answer or feedback", with: "Everyone has a home")
     |> click_button("Send")
+    |> assert_has("#true-north-candidates", text: "Everyone has a home")
+    |> refute_has("#emerging-matrix", text: "Everyone has a home")
+    |> click_button(
+      "#true-north-candidates article:first-of-type button",
+      "Submit this True North"
+    )
+    |> assert_has("#true-north-agreed", text: "Everyone has a home")
+    |> click_button("Continue to Aspirations")
+    |> assert_has("h1", text: "Conversational interview")
+    |> assert_has("#true-north-inline-confirmation", text: "Everyone has a home")
     |> assert_has("#emerging-matrix", text: "Everyone has a home")
   end
 
@@ -130,7 +150,7 @@ defmodule XMatrixWeb.InterviewLiveTest do
 
     conn
     |> visit("/interview/#{strategy.id}")
-    |> fill_in("Your answer", with: "Everyone has a home")
+    |> fill_in("Your answer or feedback", with: "Everyone has a home")
     |> click_button("Send")
     |> assert_has("div", text: "The AI facilitator was unavailable")
     |> assert_has("#interview-transcript", text: "Everyone has a home")

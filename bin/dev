@@ -55,9 +55,17 @@ up() {
   ensure_postgres
 }
 
-# @cmd Stop development services.
+# @cmd Stop development services and any Phoenix server listening on port 4000.
 down() {
   devenv processes down || true
+
+  if command -v lsof >/dev/null 2>&1; then
+    pids=$(lsof -tiTCP:4000 -sTCP:LISTEN 2>/dev/null || true)
+    if [ -n "$pids" ]; then
+      echo "Stopping Phoenix listener(s) on port 4000: $pids"
+      kill $pids 2>/dev/null || true
+    fi
+  fi
 }
 
 # @cmd Run the Phoenix server only. Assumes Postgres is already running.

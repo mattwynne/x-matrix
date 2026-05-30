@@ -72,6 +72,50 @@ defmodule XMatrix.StrategiesTest do
     assert [^first, ^second] = Strategies.list_messages(strategy)
   end
 
+  test "true north section sessions are created and updated", %{strategy: strategy} do
+    session = Strategies.get_section_session(strategy, :true_north)
+
+    assert session.section == :true_north
+    assert session.state["status"] == "in_progress"
+    assert session.state["candidates"] == []
+
+    {:ok, updated} =
+      Strategies.update_section_session(strategy, :true_north, %{
+        candidates: [%{id: "c1", title: "Everyone housed", description: "Clear direction."}]
+      })
+
+    assert updated.id == session.id
+
+    assert updated.state["candidates"] == [
+             %{"id" => "c1", "title" => "Everyone housed", "description" => "Clear direction."}
+           ]
+  end
+
+  test "submit_true_north creates then updates the single true north and advances", %{
+    strategy: strategy
+  } do
+    {:ok, %{element: first, strategy: advanced}} =
+      Strategies.submit_true_north(strategy, %{
+        title: "Everyone housed",
+        description: "A safe home for everyone."
+      })
+
+    assert first.element_type == :true_north
+    assert advanced.current_step == "true_north_agreed"
+
+    {:ok, %{element: second}} =
+      Strategies.submit_true_north(advanced, %{
+        title: "No one sleeps rough",
+        description: "The clearest possible outcome."
+      })
+
+    reloaded = Strategies.get_strategy!(strategy.id)
+    assert first.id == second.id
+    assert Enum.count(Strategies.elements_by_type(reloaded, :true_north)) == 1
+    assert [true_north] = Strategies.elements_by_type(reloaded, :true_north)
+    assert true_north.title == "No one sleeps rough"
+  end
+
   test "completed strategies reject direct mutations", %{strategy: strategy} do
     {:ok, element} = Strategies.add_element(strategy, %{element_type: :tactic, title: "Before"})
     {:ok, target} = Strategies.add_element(strategy, %{element_type: :evidence, title: "Metric"})

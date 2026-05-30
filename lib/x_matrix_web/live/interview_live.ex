@@ -53,11 +53,13 @@ defmodule XMatrixWeb.InterviewLive do
 
       {:ok, _message} = Strategies.add_message(socket.assigns.strategy, :user, content)
 
+      socket = sync_true_north_session(socket)
+
       socket =
-        if ai_assisted? do
-          socket
-        else
-          persist_stage_element(socket, stage, content, nil)
+        cond do
+          stage == :true_north -> socket
+          ai_assisted? -> socket
+          true -> persist_stage_element(socket, stage, content, nil)
         end
 
       socket = facilitator_turn(socket)
@@ -72,6 +74,44 @@ defmodule XMatrixWeb.InterviewLive do
       })
 
     {:noreply, load(assign(socket, :strategy, strategy), strategy.id)}
+  end
+
+  def handle_event("edit_true_north_candidate", %{"id" => id}, socket) do
+    {:noreply, assign(socket, :editing_true_north_candidate_id, id)}
+  end
+
+  def handle_event("submit_true_north_candidate", %{"id" => id}, socket) do
+    candidate = Enum.find(socket.assigns.true_north_candidates, &(&1.id == id))
+
+    socket =
+      if candidate do
+        submit_true_north(socket, candidate.title, candidate.description)
+      else
+        socket
+      end
+
+    {:noreply, load(socket, socket.assigns.strategy.id)}
+  end
+
+  def handle_event(
+        "save_true_north_candidate_edit",
+        %{"candidate_id" => id, "candidate" => attrs},
+        socket
+      ) do
+    candidate = Enum.find(socket.assigns.true_north_candidates, &(&1.id == id))
+
+    socket =
+      if candidate do
+        submit_true_north(
+          socket,
+          Map.get(attrs, "title", candidate.title),
+          Map.get(attrs, "description", candidate.description)
+        )
+      else
+        socket
+      end
+
+    {:noreply, load(socket, socket.assigns.strategy.id)}
   end
 
   def handle_event("add_message_as_element", %{"id" => id}, socket) do
@@ -131,6 +171,10 @@ defmodule XMatrixWeb.InterviewLive do
     {:noreply, goto(socket, next_on_spine(socket.assigns.step, socket.assigns))}
   end
 
+  def handle_event("continue_to_aspirations", _params, socket) do
+    {:noreply, goto(socket, "chat:aspiration")}
+  end
+
   def handle_event("back", _params, socket) do
     {:noreply, goto(socket, prev_on_spine(socket.assigns.step, socket.assigns))}
   end
@@ -164,10 +208,15 @@ defmodule XMatrixWeb.InterviewLive do
     step = sanitize_step(strategy.current_step || "chat:true_north")
     stage = stage_from_step(step)
 
+    true_north_session = Strategies.get_section_session(strategy, :true_north)
+
     socket
     |> assign(:strategy, strategy)
     |> assign(:step, step)
     |> assign(:stage, stage)
+    |> assign(:true_north_session, true_north_session)
+    |> assign(:true_north_candidates, true_north_candidates(true_north_session))
+    |> assign(:editing_true_north_candidate_id, nil)
     |> assign(:messages, Strategies.list_messages(strategy))
     |> assign(:true_north, Strategies.elements_by_type(strategy, :true_north))
     |> assign(:aspirations, Strategies.elements_by_type(strategy, :aspiration))
@@ -185,7 +234,11 @@ defmodule XMatrixWeb.InterviewLive do
        when stage in @element_stages do
     {:ok, reply} = XMatrix.LLM.Scripted.facilitate(stage, [], snapshot(socket.assigns))
     {:ok, _} = Strategies.add_message(socket.assigns.strategy, :assistant, reply.message)
-    assign(socket, :messages, Strategies.list_messages(socket.assigns.strategy))
+
+    socket
+    |> assign(:messages, Strategies.list_messages(socket.assigns.strategy))
+    |> maybe_store_true_north_candidates(reply.proposals)
+    |> sync_true_north_session()
   end
 
   defp ensure_opening_prompt(socket), do: socket
@@ -199,11 +252,12 @@ defmodule XMatrixWeb.InterviewLive do
       {:ok, reply} ->
         {:ok, _} = Strategies.add_message(socket.assigns.strategy, :assistant, reply.message)
 
-        assign(
-          socket,
-          :pending_proposals,
-          normalize_proposals(reply.proposals, socket.assigns.stage)
-        )
+        proposals = normalize_proposals(reply.proposals, socket.assigns.stage)
+
+        socket
+        |> assign(:pending_proposals, proposals)
+        |> maybe_store_true_north_candidates(proposals)
+        |> sync_true_north_session()
 
       {:error, _reason} ->
         {:ok, reply} =
@@ -215,12 +269,16 @@ defmodule XMatrixWeb.InterviewLive do
 
         {:ok, _} = Strategies.add_message(socket.assigns.strategy, :assistant, reply.message)
 
+        proposals = normalize_proposals(reply.proposals, socket.assigns.stage)
+
         socket
         |> put_flash(
           :info,
           "The AI facilitator was unavailable, so we switched to the free scripted guide."
         )
-        |> assign(:pending_proposals, [])
+        |> assign(:pending_proposals, proposals)
+        |> maybe_store_true_north_candidates(proposals)
+        |> sync_true_north_session()
     end
   end
 
@@ -250,6 +308,84 @@ defmodule XMatrixWeb.InterviewLive do
       })
 
     socket
+  end
+
+  defp submit_true_north(socket, title, description) do
+    {:ok, %{strategy: strategy}} =
+      Strategies.submit_true_north(socket.assigns.strategy, %{
+        title: title,
+        description: description
+      })
+
+    assign(socket, :strategy, strategy)
+  end
+
+  defp maybe_store_true_north_candidates(%{assigns: %{stage: :true_north}} = socket, proposals) do
+    candidates =
+      proposals
+      |> Enum.filter(&(&1.type == :true_north))
+      |> Enum.map(&candidate_from_proposal/1)
+
+    if candidates == [] do
+      socket
+    else
+      state =
+        socket.assigns.true_north_session.state
+        |> Map.put("candidates", candidates)
+        |> Map.put("status", "in_progress")
+
+      {:ok, session} =
+        Strategies.update_section_session(socket.assigns.strategy, :true_north, state)
+
+      socket
+      |> assign(:true_north_session, session)
+      |> assign(:true_north_candidates, true_north_candidates(session))
+    end
+  end
+
+  defp maybe_store_true_north_candidates(socket, _proposals), do: socket
+
+  defp sync_true_north_session(%{assigns: %{stage: :true_north}} = socket) do
+    messages =
+      socket.assigns.strategy
+      |> Strategies.list_messages()
+      |> Enum.map(&%{"role" => to_string(&1.role), "content" => &1.content})
+
+    state =
+      socket.assigns.true_north_session.state
+      |> Map.put("messages", messages)
+
+    {:ok, session} =
+      Strategies.update_section_session(socket.assigns.strategy, :true_north, state)
+
+    socket
+    |> assign(:true_north_session, session)
+    |> assign(:true_north_candidates, true_north_candidates(session))
+  end
+
+  defp sync_true_north_session(socket), do: socket
+
+  defp true_north_candidates(session) do
+    session.state
+    |> Map.get("candidates", [])
+    |> Enum.map(&normalize_candidate/1)
+    |> Enum.reject(&(&1.title == ""))
+  end
+
+  defp normalize_candidate(candidate) do
+    %{
+      id: Map.get(candidate, "id") || Map.get(candidate, :id) || Ecto.UUID.generate(),
+      title: Map.get(candidate, "title") || Map.get(candidate, :title) || "",
+      description: Map.get(candidate, "description") || Map.get(candidate, :description) || ""
+    }
+  end
+
+  defp candidate_from_proposal(proposal) do
+    %{
+      "id" => proposal.id,
+      "title" => proposal.title,
+      "description" => proposal.description || ""
+    }
   end
 
   defp normalize_proposals(proposals, fallback_type) do
@@ -325,6 +461,7 @@ defmodule XMatrixWeb.InterviewLive do
     end
   end
 
+  defp sanitize_step("true_north_agreed"), do: "true_north_agreed"
   defp sanitize_step("review"), do: "review"
   defp sanitize_step(_step), do: "chat:true_north"
 
@@ -395,27 +532,218 @@ defmodule XMatrixWeb.InterviewLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <%= if chat_stage?(@stage) do %>
-        <.chat_interview
-          strategy={@strategy}
-          stage={@stage}
-          messages={@messages}
-          pending_proposals={@pending_proposals}
-          editing_proposal_id={@editing_proposal_id}
-          fallback_notice={@fallback_notice}
-          effective_ai_assisted={@effective_ai_assisted}
+      <%= cond do %>
+        <% @stage == :true_north -> %>
+          <.true_north_interview
+            strategy={@strategy}
+            stage={@stage}
+            messages={@messages}
+            candidates={@true_north_candidates}
+            editing_candidate_id={@editing_true_north_candidate_id}
+            fallback_notice={@fallback_notice}
+            true_north={@true_north}
+            aspirations={@aspirations}
+            strategies={@strategies}
+            evidence={@evidence}
+            tactics={@tactics}
+          />
+        <% chat_stage?(@stage) -> %>
+          <.chat_interview
+            strategy={@strategy}
+            stage={@stage}
+            messages={@messages}
+            pending_proposals={@pending_proposals}
+            editing_proposal_id={@editing_proposal_id}
+            fallback_notice={@fallback_notice}
+            effective_ai_assisted={@effective_ai_assisted}
+            true_north={@true_north}
+            aspirations={@aspirations}
+            strategies={@strategies}
+            evidence={@evidence}
+            tactics={@tactics}
+          />
+        <% true -> %>
+          <div class="mx-auto max-w-2xl">
+            {render_step(assigns)}
+          </div>
+      <% end %>
+    </Layouts.app>
+    """
+  end
+
+  attr :strategy, :map, required: true
+  attr :stage, :atom, required: true
+  attr :messages, :list, required: true
+  attr :candidates, :list, required: true
+  attr :editing_candidate_id, :string, default: nil
+  attr :fallback_notice, :string, default: nil
+  attr :true_north, :list, required: true
+  attr :aspirations, :list, required: true
+  attr :strategies, :list, required: true
+  attr :evidence, :list, required: true
+  attr :tactics, :list, required: true
+
+  defp true_north_interview(assigns) do
+    ~H"""
+    <div class="mx-auto max-w-7xl px-4 py-8">
+      <.taste_progress stage={@stage} />
+
+      <div
+        :if={@fallback_notice}
+        class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+      >
+        {@fallback_notice}
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <section
+          id="true-north-agreement"
+          class="rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
+          <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-wide text-indigo-700">True North</p>
+              <h1 class="text-2xl font-bold text-slate-950">True North agreement</h1>
+              <p class="mt-1 text-sm text-slate-500">
+                Nothing is saved to the matrix until you explicitly submit a candidate.
+              </p>
+            </div>
+            <button
+              id="ai-toggle"
+              type="button"
+              phx-click="toggle_ai"
+              class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-indigo-400 hover:text-indigo-700"
+            >
+              AI {(@strategy.ai_assisted && "ON") || "OFF"}
+            </button>
+          </div>
+
+          <div id="interview-transcript" class="max-h-[28rem] space-y-4 overflow-y-auto px-5 py-5">
+            <article
+              :for={message <- @messages}
+              id={"message-#{message.id}"}
+              class={[
+                "rounded-2xl px-4 py-3",
+                message.role == :assistant && "mr-10 bg-indigo-50 text-indigo-950",
+                message.role == :user && "ml-10 bg-slate-900 text-white"
+              ]}
+            >
+              <p class="text-xs font-semibold uppercase tracking-wide opacity-70">{message.role}</p>
+              <p class="mt-1 whitespace-pre-wrap">{message.content}</p>
+            </article>
+          </div>
+
+          <div id="true-north-candidates" class="border-t border-slate-200 px-5 py-5">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="text-lg font-bold text-slate-950">Candidate statements</h2>
+                <p class="text-sm text-slate-500">
+                  Send feedback to refine these, or edit and submit one.
+                </p>
+              </div>
+            </div>
+            <p
+              :if={@candidates == []}
+              class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500"
+            >
+              No candidates yet. Answer the facilitator’s question to generate options.
+            </p>
+            <div class="mt-4 grid gap-3">
+              <article
+                :for={candidate <- @candidates}
+                id={"true-north-candidate-#{candidate.id}"}
+                class="true-north-candidate rounded-2xl border border-indigo-200 bg-indigo-50/40 p-4"
+              >
+                <%= if @editing_candidate_id == candidate.id do %>
+                  <form
+                    id={"true-north-edit-form-#{candidate.id}"}
+                    phx-submit="save_true_north_candidate_edit"
+                  >
+                    <input type="hidden" name="candidate_id" value={candidate.id} />
+                    <.input name="candidate[title]" label="Statement" value={candidate.title} />
+                    <.input
+                      name="candidate[description]"
+                      type="textarea"
+                      rows="3"
+                      label="Explanation"
+                      value={candidate.description || ""}
+                    />
+                    <button class="mt-3 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-800">
+                      Submit edited True North
+                    </button>
+                  </form>
+                <% else %>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                    Candidate
+                  </p>
+                  <h3 class="mt-1 text-lg font-bold text-slate-950">{candidate.title}</h3>
+                  <p class="mt-2 text-sm text-slate-600">{candidate.description}</p>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      phx-click="submit_true_north_candidate"
+                      phx-value-id={candidate.id}
+                      class="rounded-lg bg-indigo-700 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-indigo-800"
+                    >
+                      Submit this True North
+                    </button>
+                    <button
+                      type="button"
+                      phx-click="edit_true_north_candidate"
+                      phx-value-id={candidate.id}
+                      class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-white"
+                    >
+                      Edit before submitting
+                    </button>
+                  </div>
+                <% end %>
+              </article>
+            </div>
+          </div>
+
+          <form
+            id="chat-form"
+            phx-submit="submit_message"
+            phx-hook="ChatComposer"
+            class="border-t border-slate-200 p-5"
+          >
+            <.input
+              id="chat-content"
+              name="message[content]"
+              type="textarea"
+              label="Your answer or feedback"
+              rows="3"
+              value=""
+              placeholder="Describe your True North, or ask for refinements such as shorter, warmer, or more ambitious."
+            />
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <p
+                id="chat-thinking-indicator"
+                class="hidden items-center gap-2 text-sm font-semibold text-indigo-700 phx-submit-loading:flex"
+              >
+                <span class="h-2 w-2 animate-pulse rounded-full bg-indigo-700"></span>
+                Facilitator is thinking…
+              </p>
+              <button
+                id="chat-send-button"
+                phx-disable-with="Thinking…"
+                class="rounded-xl bg-indigo-700 px-5 py-2 font-semibold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              >
+                Send
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <.emerging_matrix
           true_north={@true_north}
           aspirations={@aspirations}
           strategies={@strategies}
           evidence={@evidence}
           tactics={@tactics}
         />
-      <% else %>
-        <div class="mx-auto max-w-2xl">
-          {render_step(assigns)}
-        </div>
-      <% end %>
-    </Layouts.app>
+      </div>
+    </div>
     """
   end
 
@@ -446,6 +774,14 @@ defmodule XMatrixWeb.InterviewLive do
 
       <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div
+            :if={@stage == :aspiration and @true_north != []}
+            id="true-north-inline-confirmation"
+            class="m-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950"
+          >
+            <p class="font-semibold">True North agreed</p>
+            <p class="mt-1">{List.first(@true_north).title}</p>
+          </div>
           <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
             <div>
               <p class="text-sm font-semibold uppercase tracking-wide text-indigo-700">
@@ -482,14 +818,19 @@ defmodule XMatrixWeb.InterviewLive do
                 phx-value-id={message.id}
                 class="mt-3 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-slate-900 transition hover:bg-indigo-100"
               >
-                Add my answer
+                Save my answer to matrix
               </button>
             </article>
 
             <.proposal_cards proposals={@pending_proposals} editing_id={@editing_proposal_id} />
           </div>
 
-          <form id="chat-form" phx-submit="submit_message" class="border-t border-slate-200 p-5">
+          <form
+            id="chat-form"
+            phx-submit="submit_message"
+            phx-hook="ChatComposer"
+            class="border-t border-slate-200 p-5"
+          >
             <.input
               id="chat-content"
               name="message[content]"
@@ -507,9 +848,22 @@ defmodule XMatrixWeb.InterviewLive do
               >
                 Move on
               </button>
-              <button class="rounded-xl bg-indigo-700 px-5 py-2 font-semibold text-white transition hover:bg-indigo-800">
-                Send
-              </button>
+              <div class="flex items-center gap-3">
+                <p
+                  id="chat-thinking-indicator"
+                  class="hidden items-center gap-2 text-sm font-semibold text-indigo-700 phx-submit-loading:flex"
+                >
+                  <span class="h-2 w-2 animate-pulse rounded-full bg-indigo-700"></span>
+                  Facilitator is thinking…
+                </p>
+                <button
+                  id="chat-send-button"
+                  phx-disable-with="Thinking…"
+                  class="rounded-xl bg-indigo-700 px-5 py-2 font-semibold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                >
+                  Send
+                </button>
+              </div>
             </div>
           </form>
         </section>
@@ -647,6 +1001,42 @@ defmodule XMatrixWeb.InterviewLive do
           </button>
         </div>
       <% end %>
+    </div>
+    """
+  end
+
+  defp render_step(%{step: "true_north_agreed"} = assigns) do
+    assigns = assign(assigns, :agreed_true_north, List.first(assigns.true_north))
+
+    ~H"""
+    <div class="mx-auto max-w-3xl px-4 py-10">
+      <.taste_progress stage={:true_north} />
+      <section
+        id="true-north-agreed"
+        class="mt-6 rounded-3xl border border-emerald-200 bg-white p-8 shadow-sm"
+      >
+        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          True North agreed
+        </p>
+        <h1 class="mt-2 text-3xl font-bold text-slate-950">You have a True North</h1>
+        <div class="mt-6 rounded-2xl bg-emerald-50 p-5 text-emerald-950">
+          <h2 class="text-xl font-bold">{@agreed_true_north && @agreed_true_north.title}</h2>
+          <p :if={@agreed_true_north && @agreed_true_north.description} class="mt-2 text-sm leading-6">
+            {@agreed_true_north.description}
+          </p>
+        </div>
+        <p class="mt-5 text-slate-600">
+          This is now saved to the matrix. Next, we will turn it into concrete aspirations.
+        </p>
+        <button
+          id="continue-to-aspirations"
+          type="button"
+          phx-click="continue_to_aspirations"
+          class="mt-6 rounded-xl bg-indigo-700 px-5 py-2 font-semibold text-white transition hover:bg-indigo-800"
+        >
+          Continue to Aspirations
+        </button>
+      </section>
     </div>
     """
   end
